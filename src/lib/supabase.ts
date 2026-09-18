@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+﻿import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabasePublishableKey =
@@ -6,7 +6,7 @@ const supabasePublishableKey =
 
 if (!supabaseUrl || !supabasePublishableKey) {
   throw new Error(
-    'Supabase n�o configurado. Verifique VITE_SUPABASE_URL e VITE_SUPABASE_PUBLISHABLE_KEY.'
+    'Supabase não configurado. Verifique VITE_SUPABASE_URL e VITE_SUPABASE_PUBLISHABLE_KEY.'
   )
 }
 
