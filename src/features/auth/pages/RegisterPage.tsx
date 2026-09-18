@@ -1,9 +1,27 @@
-﻿import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import {
+  useState,
+  type FormEvent,
+} from 'react'
+
+import {
+  ArrowRight,
+  LockKeyhole,
+  Mail,
+  UserRound,
+} from 'lucide-react'
+
+import {
+  Link,
+  useNavigate,
+} from 'react-router-dom'
+
+import { BrandMark } from '../../../components/BrandMark'
 import { supabase } from '../../../lib/supabase'
+import { useTheme } from '../../../theme/ThemeContext'
 
 export function RegisterPage() {
   const navigate = useNavigate()
+  const { playSound } = useTheme()
 
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
@@ -13,7 +31,7 @@ export function RegisterPage() {
   const [message, setMessage] = useState('')
 
   async function handleSubmit(
-    event: React.FormEvent<HTMLFormElement>
+    event: FormEvent<HTMLFormElement>
   ) {
     event.preventDefault()
 
@@ -40,6 +58,8 @@ export function RegisterPage() {
       return
     }
 
+    playSound('success')
+
     if (!data.session) {
       setMessage(
         'Conta criada! Confira seu e-mail para confirmar o cadastro.'
@@ -47,78 +67,103 @@ export function RegisterPage() {
       return
     }
 
-    navigate('/app')
+    navigate('/onboarding')
   }
 
   return (
-    <main className="auth-page">
-      <section className="auth-card">
-        <div className="brand">LEVEL</div>
+    <main className="auth-screen">
+      <div className="auth-glow auth-glow-one" />
+      <div className="auth-glow auth-glow-two" />
 
-        <p className="eyebrow">
-          Bora subir de nível?
-        </p>
+      <section className="auth-panel glass register-panel">
+        <BrandMark className="auth-logo" />
+
+        <span className="auth-kicker">
+          SUA JORNADA COMEÇA AGORA
+        </span>
 
         <h1>Crie sua conta.</h1>
 
-        <p className="description">
-          Estudo, carreira e oportunidades em um único lugar.
+        <p>
+          Entre para a LEVEL e monte uma experiência
+          de estudo do seu jeito.
         </p>
 
-        <form onSubmit={handleSubmit}>
-          <div className="form-row">
+        <form
+          className="auth-form"
+          onSubmit={handleSubmit}
+        >
+          <div className="form-grid">
             <label>
-              Primeiro nome
-              <input
-                value={firstName}
-                onChange={(e) =>
-                  setFirstName(e.target.value)
-                }
-                required
-              />
+              Nome
+              <div className="field">
+                <UserRound size={18} />
+
+                <input
+                  value={firstName}
+                  onChange={(event) =>
+                    setFirstName(event.target.value)
+                  }
+                  required
+                />
+              </div>
             </label>
 
             <label>
               Sobrenome
-              <input
-                value={lastName}
-                onChange={(e) =>
-                  setLastName(e.target.value)
-                }
-                required
-              />
+              <div className="field">
+                <UserRound size={18} />
+
+                <input
+                  value={lastName}
+                  onChange={(event) =>
+                    setLastName(event.target.value)
+                  }
+                  required
+                />
+              </div>
             </label>
           </div>
 
           <label>
             E-mail
-            <input
-              type="email"
-              value={email}
-              onChange={(e) =>
-                setEmail(e.target.value)
-              }
-              required
-              autoComplete="email"
-            />
+            <div className="field">
+              <Mail size={18} />
+
+              <input
+                type="email"
+                value={email}
+                onChange={(event) =>
+                  setEmail(event.target.value)
+                }
+                required
+              />
+            </div>
           </label>
 
           <label>
             Senha
-            <input
-              type="password"
-              value={password}
-              onChange={(e) =>
-                setPassword(e.target.value)
-              }
-              minLength={8}
-              required
-              autoComplete="new-password"
-            />
+            <div className="field">
+              <LockKeyhole size={18} />
+
+              <input
+                type="password"
+                minLength={8}
+                value={password}
+                onChange={(event) =>
+                  setPassword(event.target.value)
+                }
+                required
+              />
+            </div>
           </label>
 
-          <label className="checkbox-row">
-            <input type="checkbox" required />
+          <label className="check-line">
+            <input
+              type="checkbox"
+              required
+            />
+
             <span>
               Li e concordo com os Termos de Uso
               e a Política de Privacidade.
@@ -126,27 +171,60 @@ export function RegisterPage() {
           </label>
 
           {message && (
-            <p className="form-message">
+            <div className="form-alert">
               {message}
-            </p>
+            </div>
           )}
 
           <button
+            className="primary-button"
             type="submit"
             disabled={loading}
           >
-            {loading
-              ? 'Criando conta...'
-              : 'Criar minha conta'}
+            <span>
+              {loading
+                ? 'Criando conta...'
+                : 'Criar minha conta'}
+            </span>
+
+            <ArrowRight size={18} />
           </button>
         </form>
 
-        <p className="auth-footer">
-          Já possui uma conta?{' '}
+        <p className="auth-link">
+          Já tem uma conta?{' '}
           <Link to="/login">
             Entrar
           </Link>
         </p>
+      </section>
+
+      <section className="auth-showcase">
+        <div className="showcase-orb">
+          <div className="showcase-core">
+            <BrandMark
+              compact
+              className="showcase-mark"
+            />
+          </div>
+
+          <span className="orbit orbit-one" />
+          <span className="orbit orbit-two" />
+          <span className="orbit orbit-three" />
+        </div>
+
+        <div className="showcase-copy">
+          <span>UM PERFIL. MUITOS CAMINHOS.</span>
+
+          <h2>
+            Aprenda, conquiste e vá além.
+          </h2>
+
+          <p>
+            Faculdade, carreira, concursos, games
+            educacionais e oportunidades.
+          </p>
+        </div>
       </section>
     </main>
   )

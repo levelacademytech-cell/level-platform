@@ -1,9 +1,26 @@
-﻿import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import {
+  useState,
+  type FormEvent,
+} from 'react'
+
+import {
+  ArrowRight,
+  LockKeyhole,
+  Mail,
+} from 'lucide-react'
+
+import {
+  Link,
+  useNavigate,
+} from 'react-router-dom'
+
+import { BrandMark } from '../../../components/BrandMark'
 import { supabase } from '../../../lib/supabase'
+import { useTheme } from '../../../theme/ThemeContext'
 
 export function LoginPage() {
   const navigate = useNavigate()
+  const { playSound } = useTheme()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -11,7 +28,7 @@ export function LoginPage() {
   const [message, setMessage] = useState('')
 
   async function handleSubmit(
-    event: React.FormEvent<HTMLFormElement>
+    event: FormEvent<HTMLFormElement>
   ) {
     event.preventDefault()
 
@@ -33,73 +50,127 @@ export function LoginPage() {
       return
     }
 
-    navigate('/app')
+    playSound('success')
+
+    const onboardingDone =
+      localStorage.getItem('level-onboarding-complete')
+
+    navigate(
+      onboardingDone
+        ? '/app'
+        : '/onboarding'
+    )
   }
 
   return (
-    <main className="auth-page">
-      <section className="auth-card">
-        <div className="brand">LEVEL</div>
+    <main className="auth-screen">
+      <div className="auth-glow auth-glow-one" />
+      <div className="auth-glow auth-glow-two" />
 
-        <p className="eyebrow">
-          Seu próximo level começa aqui.
-        </p>
+      <section className="auth-panel glass">
+        <BrandMark className="auth-logo" />
+
+        <span className="auth-kicker">
+          LEVEL ACADEMY
+        </span>
 
         <h1>Bem-vindo de volta.</h1>
 
-        <p className="description">
-          Entre na sua conta para continuar sua evolução.
+        <p>
+          Entre na sua conta para continuar evoluindo.
         </p>
 
-        <form onSubmit={handleSubmit}>
+        <form
+          className="auth-form"
+          onSubmit={handleSubmit}
+        >
           <label>
             E-mail
-            <input
-              type="email"
-              value={email}
-              onChange={(e) =>
-                setEmail(e.target.value)
-              }
-              required
-              autoComplete="email"
-            />
+            <div className="field">
+              <Mail size={18} />
+
+              <input
+                type="email"
+                placeholder="voce@email.com"
+                value={email}
+                onChange={(event) =>
+                  setEmail(event.target.value)
+                }
+                required
+              />
+            </div>
           </label>
 
           <label>
             Senha
-            <input
-              type="password"
-              value={password}
-              onChange={(e) =>
-                setPassword(e.target.value)
-              }
-              required
-              autoComplete="current-password"
-            />
+            <div className="field">
+              <LockKeyhole size={18} />
+
+              <input
+                type="password"
+                placeholder="Sua senha"
+                value={password}
+                onChange={(event) =>
+                  setPassword(event.target.value)
+                }
+                required
+              />
+            </div>
           </label>
 
           {message && (
-            <p className="form-message">
+            <div className="form-alert">
               {message}
-            </p>
+            </div>
           )}
 
           <button
+            className="primary-button"
             type="submit"
             disabled={loading}
           >
-            {loading
-              ? 'Entrando...'
-              : 'Entrar'}
+            <span>
+              {loading ? 'Entrando...' : 'Entrar'}
+            </span>
+
+            <ArrowRight size={18} />
           </button>
         </form>
 
-        <p className="auth-footer">
+        <p className="auth-link">
           Ainda não tem uma conta?{' '}
           <Link to="/cadastro">
-            Criar conta
+            Crie sua conta
           </Link>
         </p>
+      </section>
+
+      <section className="auth-showcase">
+        <div className="showcase-orb">
+          <div className="showcase-core">
+            <BrandMark
+              compact
+              className="showcase-mark"
+            />
+          </div>
+
+          <span className="orbit orbit-one" />
+          <span className="orbit orbit-two" />
+          <span className="orbit orbit-three" />
+        </div>
+
+        <div className="showcase-copy">
+          <span>ESTUDE • JOGUE • EVOLUA</span>
+
+          <h2>
+            Seu próximo level começa aqui.
+          </h2>
+
+          <p>
+            Uma experiência criada para acompanhar
+            você do estudo à carreira.
+          </p>
+        </div>
       </section>
     </main>
   )
