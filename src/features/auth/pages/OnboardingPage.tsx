@@ -1,5 +1,4 @@
-import { useState } from 'react'
-
+﻿import { useState } from 'react'
 import {
   ArrowRight,
   Check,
@@ -8,52 +7,32 @@ import {
 import { useNavigate } from 'react-router-dom'
 
 import { BrandMark } from '../../../components/BrandMark'
-import { useAuth } from '../context/AuthContext'
-import { supabase } from '../../../lib/supabase'
-import { useTheme } from '../../../theme/ThemeContext'
-
-import {
-  themePresetList,
-  type ThemePresetId,
-} from '../../../theme/presets'
+import { useCourses } from '../../../courses/CourseContext'
+import { themePresets } from '../../../theme/presets'
 
 export function OnboardingPage() {
   const navigate = useNavigate()
-  const { user } = useAuth()
 
   const {
-    preset,
-    setPreset,
-    playSound,
-  } = useTheme()
+    courses,
+    enrollAndActivate,
+  } = useCourses()
 
   const [selected, setSelected] =
-    useState<ThemePresetId>(preset)
+    useState<string | null>(null)
 
-  const [saving, setSaving] = useState(false)
+  const [saving, setSaving] =
+    useState(false)
 
   async function finish() {
-    if (!user) return
+    if (!selected) return
 
     setSaving(true)
 
-    setPreset(selected)
-
-    await supabase
-      .from('profiles')
-      .update({
-        onboarding_completed: true,
-      })
-      .eq('id', user.id)
-
-    localStorage.setItem(
-      'level-onboarding-complete',
-      'true'
-    )
-
-    playSound('level')
+    await enrollAndActivate(selected)
 
     setSaving(false)
+
     navigate('/app')
   }
 
@@ -63,66 +42,79 @@ export function OnboardingPage() {
         <BrandMark className="onboarding-logo" />
 
         <span className="auth-kicker">
-          PERSONALIZE SUA EXPERIÊNCIA
+          VAMOS PERSONALIZAR SUA LEVEL
         </span>
 
         <h1>
-          O que mais combina com você agora?
+          O que você vai estudar?
         </h1>
 
         <p>
-          Isso muda cores, atmosfera, banners
-          e alguns destaques da sua LEVEL.
+          Escolha seu primeiro curso.
+          A experiência, as cores e os conteúdos
+          serão ajustados automaticamente.
         </p>
 
         <div className="theme-selector-grid">
-          {themePresetList.map((theme) => (
-            <button
-              key={theme.id}
-              className={
-                `theme-choice ${
-                  selected === theme.id
-                    ? 'selected'
-                    : ''
-                }`
-              }
-              onClick={() => {
-                setSelected(theme.id)
-                setPreset(theme.id)
-                playSound('click')
-              }}
-            >
-              <span
-                className="theme-preview"
-                style={{
-                  background: theme.heroGradient,
-                }}
+          {courses.map((course) => {
+            const visual =
+              themePresets[
+                course.theme_key
+              ] ?? themePresets.level
+
+            return (
+              <button
+                key={course.id}
+                className={
+                  `theme-choice ${
+                    selected === course.id
+                      ? 'selected'
+                      : ''
+                  }`
+                }
+                onClick={() =>
+                  setSelected(course.id)
+                }
               >
-                <span>{theme.emoji}</span>
-              </span>
+                <span
+                  className="theme-preview"
+                  style={{
+                    background:
+                      visual.heroGradient,
+                  }}
+                >
+                  <span>
+                    {course.icon_emoji ?? '🎓'}
+                  </span>
+                </span>
 
-              <strong>{theme.label}</strong>
+                <strong>
+                  {course.name}
+                </strong>
 
-              {selected === theme.id && (
-                <Check
-                  size={17}
-                  className="choice-check"
-                />
-              )}
-            </button>
-          ))}
+                <small>
+                  {course.description}
+                </small>
+
+                {selected === course.id && (
+                  <Check
+                    size={17}
+                    className="choice-check"
+                  />
+                )}
+              </button>
+            )
+          })}
         </div>
 
         <button
           className="primary-button onboarding-action"
           onClick={finish}
-          disabled={saving}
+          disabled={!selected || saving}
         >
-          <span>
-            {saving
-              ? 'Preparando sua LEVEL...'
-              : 'Entrar na LEVEL'}
-          </span>
+          {saving
+            ? 'Preparando sua LEVEL...'
+            : 'Começar'}
 
           <ArrowRight size={18} />
         </button>
