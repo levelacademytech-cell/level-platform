@@ -1,20 +1,34 @@
-﻿import { useState } from 'react'
+import {
+  useState,
+} from 'react'
+
 import {
   ArrowRight,
   Check,
 } from 'lucide-react'
 
-import { useNavigate } from 'react-router-dom'
+import {
+  Navigate,
+  useNavigate,
+} from 'react-router-dom'
 
 import { BrandMark } from '../../../components/BrandMark'
-import { useCourses } from '../../../courses/CourseContext'
-import { themePresets } from '../../../theme/presets'
+
+import {
+  useCourses,
+} from '../../../courses/CourseContext'
+
+import {
+  themePresets,
+} from '../../../theme/presets'
 
 export function OnboardingPage() {
   const navigate = useNavigate()
 
   const {
     courses,
+    activeCourse,
+    loading,
     enrollAndActivate,
   } = useCourses()
 
@@ -24,101 +38,137 @@ export function OnboardingPage() {
   const [saving, setSaving] =
     useState(false)
 
+  if (loading) {
+    return (
+      <main className="onboarding-page">
+        <div className="level-loading-mark">
+          <BrandMark compact />
+          <span>Preparando sua LEVEL...</span>
+        </div>
+      </main>
+    )
+  }
+
+  if (activeCourse) {
+    return (
+      <Navigate
+        to="/app"
+        replace
+      />
+    )
+  }
+
   async function finish() {
     if (!selected) return
 
     setSaving(true)
 
-    await enrollAndActivate(selected)
+    try {
+      await enrollAndActivate(selected)
 
-    setSaving(false)
-
-    navigate('/app')
+      navigate('/app', {
+        replace: true,
+      })
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
-    <main className="onboarding-page">
-      <div className="onboarding-card glass">
+    <main className="onboarding-page course-onboarding">
+      <section className="course-onboarding-header">
         <BrandMark className="onboarding-logo" />
 
         <span className="auth-kicker">
-          VAMOS PERSONALIZAR SUA LEVEL
+          PRIMEIRO ACESSO
         </span>
 
         <h1>
-          O que você vai estudar?
+          Qual caminho você quer começar?
         </h1>
 
         <p>
           Escolha seu primeiro curso.
-          A experiência, as cores e os conteúdos
-          serão ajustados automaticamente.
+          A identidade da LEVEL será criada
+          automaticamente para essa área.
         </p>
+      </section>
 
-        <div className="theme-selector-grid">
-          {courses.map((course) => {
-            const visual =
-              themePresets[
-                course.theme_key
-              ] ?? themePresets.level
+      <section className="course-picker-grid">
+        {courses.map((course) => {
+          const visual =
+            themePresets[
+              course.theme_key
+            ] ?? themePresets.level
 
-            return (
-              <button
-                key={course.id}
-                className={
-                  `theme-choice ${
-                    selected === course.id
-                      ? 'selected'
-                      : ''
-                  }`
-                }
-                onClick={() =>
-                  setSelected(course.id)
-                }
-              >
-                <span
-                  className="theme-preview"
-                  style={{
-                    background:
-                      visual.heroGradient,
-                  }}
-                >
-                  <span>
-                    {course.icon_emoji ?? '🎓'}
-                  </span>
-                </span>
+          const isSelected =
+            selected === course.id
 
+          return (
+            <button
+              key={course.id}
+              className={
+                `course-picker-card ${
+                  isSelected
+                    ? 'selected'
+                    : ''
+                }`
+              }
+              onClick={() =>
+                setSelected(course.id)
+              }
+            >
+              <div
+                className="course-picker-stripe"
+                style={{
+                  background:
+                    visual.heroGradient,
+                }}
+              />
+
+              <div className="course-picker-number">
+                {String(
+                  courses.indexOf(course) + 1
+                ).padStart(2, '0')}
+              </div>
+
+              <div className="course-picker-icon">
+                {course.icon_emoji ?? '🎓'}
+              </div>
+
+              <div className="course-picker-copy">
                 <strong>
                   {course.name}
                 </strong>
 
-                <small>
+                <p>
                   {course.description}
-                </small>
+                </p>
+              </div>
 
-                {selected === course.id && (
-                  <Check
-                    size={17}
-                    className="choice-check"
-                  />
-                )}
-              </button>
-            )
-          })}
-        </div>
+              {isSelected && (
+                <div className="course-picker-check">
+                  <Check size={17} />
+                </div>
+              )}
+            </button>
+          )
+        })}
+      </section>
 
-        <button
-          className="primary-button onboarding-action"
-          onClick={finish}
-          disabled={!selected || saving}
-        >
+      <button
+        className="primary-button onboarding-action"
+        onClick={finish}
+        disabled={!selected || saving}
+      >
+        <span>
           {saving
-            ? 'Preparando sua LEVEL...'
-            : 'Começar'}
+            ? 'Criando seu ambiente...'
+            : 'Começar neste curso'}
+        </span>
 
-          <ArrowRight size={18} />
-        </button>
-      </div>
+        <ArrowRight size={18} />
+      </button>
     </main>
   )
 }

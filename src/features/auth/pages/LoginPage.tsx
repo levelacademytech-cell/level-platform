@@ -5,8 +5,11 @@ import {
 
 import {
   ArrowRight,
+  GraduationCap,
   LockKeyhole,
   Mail,
+  ShieldCheck,
+  X,
 } from 'lucide-react'
 
 import {
@@ -16,16 +19,33 @@ import {
 
 import { BrandMark } from '../../../components/BrandMark'
 import { supabase } from '../../../lib/supabase'
-import { useTheme } from '../../../theme/ThemeContext'
+
+const privilegedRoles = [
+  'director',
+  'admin',
+  'super_admin',
+]
 
 export function LoginPage() {
   const navigate = useNavigate()
-  const { playSound } = useTheme()
 
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [message, setMessage] = useState('')
+  const [email, setEmail] =
+    useState('')
+
+  const [password, setPassword] =
+    useState('')
+
+  const [loading, setLoading] =
+    useState(false)
+
+  const [message, setMessage] =
+    useState('')
+
+  const [showAccessChoice, setShowAccessChoice] =
+    useState(false)
+
+  const [studentDestination, setStudentDestination] =
+    useState('/app')
 
   async function handleSubmit(
     event: FormEvent<HTMLFormElement>
@@ -35,143 +55,291 @@ export function LoginPage() {
     setLoading(true)
     setMessage('')
 
-    const { error } =
-      await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
+    const {
+      data,
+      error,
+    } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
 
-    setLoading(false)
+    if (error || !data.user) {
+      setLoading(false)
 
-    if (error) {
       setMessage(
-        'Não foi possível entrar. Confira seu e-mail e sua senha.'
+        'Nao foi possivel entrar. Confira seu e-mail e sua senha.'
       )
+
       return
     }
 
-    playSound('success')
+    const [
+      profileResult,
+      rolesResult,
+    ] = await Promise.all([
+      supabase
+        .from('profiles')
+        .select('active_course_id')
+        .eq('id', data.user.id)
+        .maybeSingle(),
 
-    const onboardingDone =
-      localStorage.getItem('level-onboarding-complete')
+      supabase.rpc(
+        'get_my_role_keys'
+      ),
+    ])
 
-    navigate(
-      onboardingDone
+    const destination =
+      profileResult.data?.active_course_id
         ? '/app'
         : '/onboarding'
+
+    setStudentDestination(
+      destination
+    )
+
+    const roles =
+      Array.isArray(rolesResult.data)
+        ? rolesResult.data.map(String)
+        : []
+
+    const hasPrivilegedAccess =
+      roles.some(
+        (role) =>
+          privilegedRoles.includes(role)
+      )
+
+    setLoading(false)
+
+    if (hasPrivilegedAccess) {
+      setShowAccessChoice(true)
+      return
+    }
+
+    navigate(
+      destination,
+      {
+        replace: true,
+      }
+    )
+  }
+
+  function enterStudent() {
+    setShowAccessChoice(false)
+
+    navigate(
+      studentDestination,
+      {
+        replace: true,
+      }
+    )
+  }
+
+  function enterDirector() {
+    setShowAccessChoice(false)
+
+    navigate(
+      '/app/controle',
+      {
+        replace: true,
+      }
     )
   }
 
   return (
-    <main className="auth-screen">
-      <div className="auth-glow auth-glow-one" />
-      <div className="auth-glow auth-glow-two" />
+    <>
+      <main className="auth-screen level-auth-v2">
+        <section className="auth-panel level-login-panel">
+          <div className="login-brand-line">
+            <BrandMark className="auth-logo" />
 
-      <section className="auth-panel glass">
-        <BrandMark className="auth-logo" />
-
-        <span className="auth-kicker">
-          LEVEL ACADEMY
-        </span>
-
-        <h1>Bem-vindo de volta.</h1>
-
-        <p>
-          Entre na sua conta para continuar evoluindo.
-        </p>
-
-        <form
-          className="auth-form"
-          onSubmit={handleSubmit}
-        >
-          <label>
-            E-mail
-            <div className="field">
-              <Mail size={18} />
-
-              <input
-                type="email"
-                placeholder="voce@email.com"
-                value={email}
-                onChange={(event) =>
-                  setEmail(event.target.value)
-                }
-                required
-              />
-            </div>
-          </label>
-
-          <label>
-            Senha
-            <div className="field">
-              <LockKeyhole size={18} />
-
-              <input
-                type="password"
-                placeholder="Sua senha"
-                value={password}
-                onChange={(event) =>
-                  setPassword(event.target.value)
-                }
-                required
-              />
-            </div>
-          </label>
-
-          {message && (
-            <div className="form-alert">
-              {message}
-            </div>
-          )}
-
-          <button
-            className="primary-button"
-            type="submit"
-            disabled={loading}
-          >
             <span>
-              {loading ? 'Entrando...' : 'Entrar'}
+              ACADEMY
             </span>
-
-            <ArrowRight size={18} />
-          </button>
-        </form>
-
-        <p className="auth-link">
-          Ainda não tem uma conta?{' '}
-          <Link to="/cadastro">
-            Crie sua conta
-          </Link>
-        </p>
-      </section>
-
-      <section className="auth-showcase">
-        <div className="showcase-orb">
-          <div className="showcase-core">
-            <BrandMark
-              compact
-              className="showcase-mark"
-            />
           </div>
 
-          <span className="orbit orbit-one" />
-          <span className="orbit orbit-two" />
-          <span className="orbit orbit-three" />
-        </div>
+          <span className="auth-kicker">
+            BEM-VINDO DE VOLTA
+          </span>
 
-        <div className="showcase-copy">
-          <span>ESTUDE • JOGUE • EVOLUA</span>
-
-          <h2>
-            Seu próximo level começa aqui.
-          </h2>
+          <h1>
+            Continue seu proximo level.
+          </h1>
 
           <p>
-            Uma experiência criada para acompanhar
-            você do estudo à carreira.
+            Entre na sua conta para acessar sua jornada.
           </p>
+
+          <form
+            className="auth-form"
+            onSubmit={handleSubmit}
+          >
+            <label>
+              E-mail
+
+              <div className="field level-field">
+                <Mail size={18} />
+
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(event) =>
+                    setEmail(
+                      event.target.value
+                    )
+                  }
+                  placeholder="voce@email.com"
+                  required
+                />
+              </div>
+            </label>
+
+            <label>
+              Senha
+
+              <div className="field level-field">
+                <LockKeyhole size={18} />
+
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(event) =>
+                    setPassword(
+                      event.target.value
+                    )
+                  }
+                  placeholder="Sua senha"
+                  required
+                />
+              </div>
+            </label>
+
+            {message && (
+              <div className="form-alert">
+                {message}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              className="primary-button level-login-button"
+              disabled={loading}
+            >
+              {loading
+                ? 'Entrando...'
+                : 'Entrar'}
+
+              <ArrowRight size={18} />
+            </button>
+          </form>
+
+          <p className="auth-link">
+            Primeira vez por aqui?{' '}
+
+            <Link to="/cadastro">
+              Criar conta
+            </Link>
+          </p>
+        </section>
+
+        <section className="level-login-scene">
+          <div className="scene-grid" />
+
+          <div className="level-monolith">
+            <BrandMark
+              compact
+              className="monolith-logo"
+            />
+
+            <span className="monolith-label">
+              YOUR NEXT LEVEL
+            </span>
+          </div>
+        </section>
+      </main>
+
+      {showAccessChoice && (
+        <div className="access-choice-overlay">
+          <section className="access-choice-modal">
+            <button
+              className="access-choice-close"
+              onClick={() =>
+                setShowAccessChoice(false)
+              }
+              aria-label="Fechar"
+            >
+              <X size={19} />
+            </button>
+
+            <div className="access-choice-brand">
+              <BrandMark compact />
+            </div>
+
+            <span className="access-choice-kicker">
+              ESCOLHA COMO ENTRAR
+            </span>
+
+            <h2>
+              Qual ambiente voce quer acessar?
+            </h2>
+
+            <p>
+              Sua conta possui mais de um nivel de acesso.
+            </p>
+
+            <div className="access-choice-grid">
+              <button
+                className="access-mode-card student-mode"
+                onClick={enterStudent}
+              >
+                <div className="access-mode-icon">
+                  <GraduationCap size={29} />
+                </div>
+
+                <span>
+                  PORTAL ACADEMICO
+                </span>
+
+                <strong>
+                  Entrar como estudante
+                </strong>
+
+                <p>
+                  Cursos, atividades, Arena, carreira e progresso.
+                </p>
+
+                <ArrowRight size={19} />
+              </button>
+
+              <button
+                className="access-mode-card director-mode"
+                onClick={enterDirector}
+              >
+                <div className="access-mode-icon">
+                  <ShieldCheck size={29} />
+                </div>
+
+                <span>
+                  DIRECAO LEVEL
+                </span>
+
+                <strong>
+                  Entrar como diretor
+                </strong>
+
+                <p>
+                  Administracao, usuarios, cursos, conteudos e configuracoes.
+                </p>
+
+                <ArrowRight size={19} />
+              </button>
+            </div>
+
+            <small>
+              Essa escolha aparece apenas para contas com mais de um perfil de acesso.
+            </small>
+          </section>
         </div>
-      </section>
-    </main>
+      )}
+    </>
   )
 }

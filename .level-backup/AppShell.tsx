@@ -13,6 +13,8 @@ import {
   ShieldCheck,
   ShoppingBag,
   Trophy,
+  Volume2,
+  VolumeX,
 } from 'lucide-react'
 
 import {
@@ -21,9 +23,22 @@ import {
 } from 'react-router-dom'
 
 import { BrandMark } from '../components/BrandMark'
-import { useAuth } from '../features/auth/context/AuthContext'
-import { useCourses } from '../courses/CourseContext'
-import { useAdmin } from '../admin/AdminContext'
+
+import {
+  useAuth,
+} from '../features/auth/context/AuthContext'
+
+import {
+  useTheme,
+} from '../theme/ThemeContext'
+
+import {
+  useCourses,
+} from '../courses/CourseContext'
+
+import {
+  useAdmin,
+} from '../admin/AdminContext'
 
 interface AppShellProps {
   children: ReactNode
@@ -32,7 +47,7 @@ interface AppShellProps {
 const navItems = [
   {
     to: '/app',
-    label: 'In\u00edcio',
+    label: 'Início',
     icon: Home,
     end: true,
   },
@@ -89,6 +104,12 @@ export function AppShell({
   } = useAuth()
 
   const {
+    soundEnabled,
+    setSoundEnabled,
+    playSound,
+  } = useTheme()
+
+  const {
     activeCourse,
     progress,
   } = useCourses()
@@ -103,19 +124,16 @@ export function AppShell({
     'Aluno'
 
   async function handleLogout() {
+    playSound('click')
+
     await signOut()
 
-    navigate(
-      '/login',
-      {
-        replace: true,
-      }
-    )
+    navigate('/login')
   }
 
   return (
     <div className="level-app">
-      <aside className="sidebar">
+      <aside className="sidebar glass">
         <div className="sidebar-brand">
           <BrandMark className="brand-wordmark" />
 
@@ -153,6 +171,9 @@ export function AppShell({
                   key={item.to}
                   to={item.to}
                   end={item.end}
+                  onClick={() =>
+                    playSound('click')
+                  }
                   className={({
                     isActive,
                   }) =>
@@ -179,7 +200,7 @@ export function AppShell({
               className={({
                 isActive,
               }) =>
-                `nav-item director-menu ${
+                `nav-item control-nav ${
                   isActive
                     ? 'active'
                     : ''
@@ -196,6 +217,25 @@ export function AppShell({
         </nav>
 
         <div className="sidebar-bottom">
+          <button
+            className="icon-action"
+            onClick={() =>
+              setSoundEnabled(
+                !soundEnabled
+              )
+            }
+          >
+            {soundEnabled
+              ? <Volume2 size={18} />
+              : <VolumeX size={18} />}
+
+            <span>
+              {soundEnabled
+                ? 'Som ativado'
+                : 'Som desligado'}
+            </span>
+          </button>
+
           <NavLink
             to="/app/configuracoes"
             className="icon-action"
@@ -203,7 +243,7 @@ export function AppShell({
             <Settings size={18} />
 
             <span>
-              {'Configura\u00e7\u00f5es'}
+              Configurações
             </span>
           </NavLink>
 
@@ -221,17 +261,16 @@ export function AppShell({
       </aside>
 
       <section className="app-main">
-        <header className="topbar">
+        <header className="topbar glass">
           <div>
             <span className="topbar-eyebrow">
-              LEVEL {'\u2022'}{' '}
+              LEVEL •{' '}
               {activeCourse?.name ??
                 'ACADEMY'}
             </span>
 
             <strong>
-              Ei, {firstName}!{' '}
-              {'\uD83D\uDC4B'}
+              Ei, {firstName}! 👋
             </strong>
           </div>
 
@@ -255,6 +294,64 @@ export function AppShell({
           {children}
         </main>
       </section>
+
+      <nav className="mobile-dock glass">
+        {navItems
+          .slice(0, 4)
+          .map((item) => {
+            const Icon = item.icon
+
+            return (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.end}
+                className={({
+                  isActive,
+                }) =>
+                  `dock-item ${
+                    isActive
+                      ? 'active'
+                      : ''
+                  }`
+                }
+              >
+                <Icon size={20} />
+
+                <span>
+                  {item.label}
+                </span>
+              </NavLink>
+            )
+          })}
+
+        <NavLink
+          to={
+            canAccessControl
+              ? '/app/controle'
+              : '/app/configuracoes'
+          }
+          className={({
+            isActive,
+          }) =>
+            `dock-item ${
+              isActive
+                ? 'active'
+                : ''
+            }`
+          }
+        >
+          {canAccessControl
+            ? <ShieldCheck size={20} />
+            : <Settings size={20} />}
+
+          <span>
+            {canAccessControl
+              ? 'Controle'
+              : 'Ajustes'}
+          </span>
+        </NavLink>
+      </nav>
     </div>
   )
 }

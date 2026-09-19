@@ -7,8 +7,6 @@ import {
   Routes,
 } from 'react-router-dom'
 
-import { ThemeProvider } from './theme/ThemeContext'
-
 import {
   AuthProvider,
 } from './features/auth/context/AuthContext'
@@ -35,6 +33,10 @@ import {
 } from './courses/CourseContext'
 
 import {
+  ThemeProvider,
+} from './theme/ThemeContext'
+
+import {
   AdminProvider,
 } from './admin/AdminContext'
 
@@ -42,13 +44,29 @@ import {
   AdminGuard,
 } from './admin/AdminGuard'
 
-import { AppShell } from './layouts/AppShell'
+import {
+  AppShell,
+} from './layouts/AppShell'
 
-import { DashboardPage } from './pages/DashboardPage'
-import { ModulePage } from './pages/ModulePage'
-import { SettingsPage } from './pages/SettingsPage'
-import { CoursesPage } from './pages/CoursesPage'
-import { ControlCenterPage } from './pages/ControlCenterPage'
+import {
+  DashboardPage,
+} from './pages/DashboardPage'
+
+import {
+  ModulePage,
+} from './pages/ModulePage'
+
+import {
+  SettingsPage,
+} from './pages/SettingsPage'
+
+import {
+  CoursesPage,
+} from './pages/CoursesPage'
+
+import {
+  ControlCenterPage,
+} from './pages/ControlCenterPage'
 
 
 function CourseGate({
@@ -63,7 +81,7 @@ function CourseGate({
 
   if (loading) {
     return (
-      <div className="level-permission-loading">
+      <div className="control-loading">
         Preparando sua LEVEL...
       </div>
     )
@@ -82,7 +100,7 @@ function CourseGate({
 }
 
 
-function StudentShell({
+function ProtectedShell({
   children,
 }: {
   children: ReactNode
@@ -99,23 +117,6 @@ function StudentShell({
 }
 
 
-function DirectorShell({
-  children,
-}: {
-  children: ReactNode
-}) {
-  return (
-    <ProtectedRoute>
-      <AdminGuard>
-        <AppShell>
-          {children}
-        </AppShell>
-      </AdminGuard>
-    </ProtectedRoute>
-  )
-}
-
-
 function App() {
   return (
     <ThemeProvider>
@@ -124,6 +125,7 @@ function App() {
           <CourseProvider>
             <AdminProvider>
               <Routes>
+
                 <Route
                   path="/"
                   element={
@@ -136,12 +138,16 @@ function App() {
 
                 <Route
                   path="/login"
-                  element={<LoginPage />}
+                  element={
+                    <LoginPage />
+                  }
                 />
 
                 <Route
                   path="/cadastro"
-                  element={<RegisterPage />}
+                  element={
+                    <RegisterPage />
+                  }
                 />
 
                 <Route
@@ -156,127 +162,129 @@ function App() {
                 <Route
                   path="/app"
                   element={
-                    <StudentShell>
+                    <ProtectedShell>
                       <DashboardPage />
-                    </StudentShell>
+                    </ProtectedShell>
                   }
                 />
 
                 <Route
                   path="/app/cursos"
                   element={
-                    <StudentShell>
+                    <ProtectedShell>
                       <CoursesPage />
-                    </StudentShell>
+                    </ProtectedShell>
                   }
                 />
 
                 <Route
                   path="/app/estudar"
                   element={
-                    <StudentShell>
+                    <ProtectedShell>
                       <ModulePage
                         eyebrow="LEVEL ACADEMY"
                         title="Estudar"
                         description="Trilhas, disciplinas, biblioteca, atividades, flashcards e progresso."
                       />
-                    </StudentShell>
+                    </ProtectedShell>
                   }
                 />
 
                 <Route
                   path="/app/arena"
                   element={
-                    <StudentShell>
+                    <ProtectedShell>
                       <ModulePage
                         eyebrow="ARENA LEVEL"
-                        title="Jogue, aprenda e suba de nivel."
-                        description="Desafios, ranking, XP, Level Coins e batalhas de conhecimento."
+                        title="Jogue, aprenda e suba de nível."
+                        description="Perguntas, desafios, ranking, XP, Level Coins e batalhas de conhecimento."
                       />
-                    </StudentShell>
+                    </ProtectedShell>
                   }
                 />
 
                 <Route
                   path="/app/carreira"
                   element={
-                    <StudentShell>
+                    <ProtectedShell>
                       <ModulePage
                         eyebrow="LEVEL CARREIRA"
-                        title="Sua carreira tambem sobe de nivel."
-                        description="Curriculo, vagas, estagios, testes e empresas parceiras."
+                        title="Sua carreira também sobe de nível."
+                        description="Currículo, vagas, estágios, testes, entrevistas e empresas parceiras."
                       />
-                    </StudentShell>
+                    </ProtectedShell>
                   }
                 />
 
                 <Route
                   path="/app/concursos"
                   element={
-                    <StudentShell>
+                    <ProtectedShell>
                       <ModulePage
                         eyebrow="CONCURSOS & PROVAS"
-                        title="Prepare-se para a proxima conquista."
-                        description="ENEM, Encceja, vestibulares, concursos e simulados."
+                        title="Prepare-se para a próxima conquista."
+                        description="ENEM, Encceja, vestibulares, concursos, simulados e preparatórios."
                       />
-                    </StudentShell>
+                    </ProtectedShell>
                   }
                 />
 
                 <Route
                   path="/app/comunidade"
                   element={
-                    <StudentShell>
+                    <ProtectedShell>
                       <ModulePage
                         eyebrow="LEVEL COMUNIDADE"
-                        title="Aprender tambem e compartilhar."
-                        description="Foruns, grupos e comunidades por curso e disciplina."
+                        title="Aprender também é compartilhar."
+                        description="Fóruns, grupos, discussões e comunidades por curso e disciplina."
                       />
-                    </StudentShell>
+                    </ProtectedShell>
                   }
                 />
 
                 <Route
                   path="/app/recompensas"
                   element={
-                    <StudentShell>
+                    <ProtectedShell>
                       <ModulePage
                         eyebrow="LEVEL REWARDS"
-                        title="Seu esforco vale recompensas."
-                        description="Level Coins, badges, beneficios e itens exclusivos."
+                        title="Seu esforço vale recompensas."
+                        description="Level Coins, badges, benefícios, Premium e itens exclusivos."
                       />
-                    </StudentShell>
+                    </ProtectedShell>
                   }
                 />
 
                 <Route
                   path="/app/store"
                   element={
-                    <StudentShell>
+                    <ProtectedShell>
                       <ModulePage
                         eyebrow="LEVEL STORE"
-                        title="Store"
-                        description="Produtos, livros, materiais e parceiros."
+                        title="Uma loja feita para quem quer evoluir."
+                        description="Produtos LEVEL, livros, materiais, parceiros e recompensas."
                       />
-                    </StudentShell>
+                    </ProtectedShell>
                   }
                 />
 
                 <Route
                   path="/app/configuracoes"
                   element={
-                    <StudentShell>
+                    <ProtectedShell>
                       <SettingsPage />
-                    </StudentShell>
+                    </ProtectedShell>
                   }
                 />
 
                 <Route
                   path="/app/controle"
                   element={
-                    <DirectorShell>
-                      <ControlCenterPage />
-                    </DirectorShell>
+                    <ProtectedShell>
+                      <AdminGuard>
+                        <ControlCenterPage />
+                      </AdminGuard>
+                    </ProtectedShell>
                   }
                 />
 
@@ -299,6 +307,7 @@ function App() {
                     />
                   }
                 />
+
               </Routes>
             </AdminProvider>
           </CourseProvider>
