@@ -47,15 +47,33 @@ export function AdminProvider({
 
     setLoading(true)
 
-    const { data, error } =
+    const rpcResult =
       await supabase.rpc(
         'get_my_role_keys'
       )
 
-    if (error) {
+    if (
+      !rpcResult.error &&
+      Array.isArray(rpcResult.data)
+    ) {
+      setRoles(
+        rpcResult.data.map(String)
+      )
+
+      setLoading(false)
+      return
+    }
+
+    const fallback =
+      await supabase
+        .from('user_roles')
+        .select('roles(key)')
+        .eq('user_id', user.id)
+
+    if (fallback.error) {
       console.error(
-        'LEVEL roles:',
-        error
+        'LEVEL role lookup:',
+        fallback.error
       )
 
       setRoles([])
@@ -63,12 +81,23 @@ export function AdminProvider({
       return
     }
 
-    setRoles(
-      Array.isArray(data)
-        ? data.map(String)
-        : []
-    )
+    const keys =
+      (fallback.data ?? [])
+        .flatMap((row: any) => {
+          const role = row.roles
 
+          if (!role) return []
+
+          if (Array.isArray(role)) {
+            return role.map(
+              (item) => String(item.key)
+            )
+          }
+
+          return [String(role.key)]
+        })
+
+    setRoles(keys)
     setLoading(false)
   }
 
@@ -104,7 +133,7 @@ export function useAdmin() {
 
   if (!context) {
     throw new Error(
-      'useAdmin precisa estar dentro de AdminProvider'
+      'AdminProvider ausente'
     )
   }
 

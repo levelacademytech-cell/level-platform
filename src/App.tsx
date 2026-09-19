@@ -42,13 +42,36 @@ import {
   AdminGuard,
 } from './admin/AdminGuard'
 
+import {
+  DirectorLayout,
+} from './admin/DirectorLayout'
+
 import { AppShell } from './layouts/AppShell'
 
 import { DashboardPage } from './pages/DashboardPage'
 import { ModulePage } from './pages/ModulePage'
 import { SettingsPage } from './pages/SettingsPage'
 import { CoursesPage } from './pages/CoursesPage'
-import { ControlCenterPage } from './pages/ControlCenterPage'
+
+import {
+  AdminDashboardPage,
+} from './pages/admin/AdminDashboardPage'
+
+import {
+  AdminUsersPage,
+} from './pages/admin/AdminUsersPage'
+
+import {
+  AdminCoursesPage,
+} from './pages/admin/AdminCoursesPage'
+
+import {
+  AdminCommunicationsPage,
+} from './pages/admin/AdminCommunicationsPage'
+
+import {
+  AdminModulePage,
+} from './pages/admin/AdminModulePage'
 
 
 function CourseGate({
@@ -99,17 +122,11 @@ function StudentShell({
 }
 
 
-function DirectorShell({
-  children,
-}: {
-  children: ReactNode
-}) {
+function DirectorShell() {
   return (
     <ProtectedRoute>
       <AdminGuard>
-        <AppShell>
-          {children}
-        </AppShell>
+        <DirectorLayout />
       </AdminGuard>
     </ProtectedRoute>
   )
@@ -124,6 +141,7 @@ function App() {
           <CourseProvider>
             <AdminProvider>
               <Routes>
+
                 <Route
                   path="/"
                   element={
@@ -191,7 +209,7 @@ function App() {
                       <ModulePage
                         eyebrow="ARENA LEVEL"
                         title="Jogue, aprenda e suba de nivel."
-                        description="Desafios, ranking, XP, Level Coins e batalhas de conhecimento."
+                        description="Desafios, ranking, XP e batalhas de conhecimento."
                       />
                     </StudentShell>
                   }
@@ -203,8 +221,8 @@ function App() {
                     <StudentShell>
                       <ModulePage
                         eyebrow="LEVEL CARREIRA"
-                        title="Sua carreira tambem sobe de nivel."
-                        description="Curriculo, vagas, estagios, testes e empresas parceiras."
+                        title="Carreira"
+                        description="Curriculo, vagas, estagios e empresas parceiras."
                       />
                     </StudentShell>
                   }
@@ -215,9 +233,9 @@ function App() {
                   element={
                     <StudentShell>
                       <ModulePage
-                        eyebrow="CONCURSOS & PROVAS"
-                        title="Prepare-se para a proxima conquista."
-                        description="ENEM, Encceja, vestibulares, concursos e simulados."
+                        eyebrow="CONCURSOS"
+                        title="Concursos e provas"
+                        description="ENEM, vestibulares, concursos e simulados."
                       />
                     </StudentShell>
                   }
@@ -228,9 +246,9 @@ function App() {
                   element={
                     <StudentShell>
                       <ModulePage
-                        eyebrow="LEVEL COMUNIDADE"
-                        title="Aprender tambem e compartilhar."
-                        description="Foruns, grupos e comunidades por curso e disciplina."
+                        eyebrow="COMUNIDADE"
+                        title="Comunidade LEVEL"
+                        description="Foruns, grupos e discussoes."
                       />
                     </StudentShell>
                   }
@@ -241,9 +259,9 @@ function App() {
                   element={
                     <StudentShell>
                       <ModulePage
-                        eyebrow="LEVEL REWARDS"
-                        title="Seu esforco vale recompensas."
-                        description="Level Coins, badges, beneficios e itens exclusivos."
+                        eyebrow="REWARDS"
+                        title="Recompensas"
+                        description="XP, moedas e beneficios."
                       />
                     </StudentShell>
                   }
@@ -254,9 +272,9 @@ function App() {
                   element={
                     <StudentShell>
                       <ModulePage
-                        eyebrow="LEVEL STORE"
-                        title="Store"
-                        description="Produtos, livros, materiais e parceiros."
+                        eyebrow="STORE"
+                        title="LEVEL Store"
+                        description="Produtos, livros e materiais."
                       />
                     </StudentShell>
                   }
@@ -271,17 +289,152 @@ function App() {
                   }
                 />
 
-                <Route
-                  path="/app/controle"
-                  element={
-                    <DirectorShell>
-                      <ControlCenterPage />
-                    </DirectorShell>
-                  }
-                />
 
                 <Route
-                  path="/app/admin"
+                  path="/app/controle"
+                  element={<DirectorShell />}
+                >
+                  <Route
+                    index
+                    element={
+                      <AdminDashboardPage />
+                    }
+                  />
+
+                  <Route
+                    path="usuarios"
+                    element={
+                      <AdminUsersPage />
+                    }
+                  />
+
+                  <Route
+                    path="cursos"
+                    element={
+                      <AdminCoursesPage />
+                    }
+                  />
+
+                  <Route
+                    path="comunicacao"
+                    element={
+                      <AdminCommunicationsPage />
+                    }
+                  />
+
+                  <Route
+                    path="conteudos"
+                    element={
+                      <AdminModulePage
+                        eyebrow="ACADEMICO"
+                        title="Disciplinas e conteudos"
+                        description="Aulas, disciplinas, bibliotecas, atividades e materiais."
+                      />
+                    }
+                  />
+
+                  <Route
+                    path="arena"
+                    element={
+                      <AdminModulePage
+                        eyebrow="GAMIFICACAO"
+                        title="Arena Level"
+                        description="Perguntas, desafios, ranking, XP e moedas."
+                      />
+                    }
+                  />
+
+                  <Route
+                    path="carreira"
+                    element={
+                      <AdminModulePage
+                        eyebrow="CARREIRA"
+                        title="Vagas e empresas"
+                        description="Empresas, vagas, candidatos e processos seletivos."
+                      />
+                    }
+                  />
+
+                  <Route
+                    path="concursos"
+                    element={
+                      <AdminModulePage
+                        eyebrow="OPORTUNIDADES"
+                        title="Concursos e provas"
+                        description="Concursos, ENEM, vestibulares, datas e preparatorios."
+                      />
+                    }
+                  />
+
+                  <Route
+                    path="comunidade"
+                    element={
+                      <AdminModulePage
+                        eyebrow="MODERACAO"
+                        title="Comunidade"
+                        description="Foruns, publicacoes, denuncias e moderacao."
+                      />
+                    }
+                  />
+
+                  <Route
+                    path="store"
+                    element={
+                      <AdminModulePage
+                        eyebrow="COMERCIO"
+                        title="Store e Rewards"
+                        description="Produtos, estoque, recompensas, XP e parceiros."
+                      />
+                    }
+                  />
+
+                  <Route
+                    path="financeiro"
+                    element={
+                      <AdminModulePage
+                        eyebrow="FINANCEIRO"
+                        title="Planos e pagamentos"
+                        description="Planos, assinaturas, compras, pagamentos e historico."
+                      />
+                    }
+                  />
+
+                  <Route
+                    path="aparencia"
+                    element={
+                      <AdminModulePage
+                        eyebrow="DESIGN SYSTEM"
+                        title="Aparencia da plataforma"
+                        description="Cores, banners, fontes, fundos, animacoes e temas por curso."
+                      />
+                    }
+                  />
+
+                  <Route
+                    path="configuracoes"
+                    element={
+                      <AdminModulePage
+                        eyebrow="SISTEMA"
+                        title="Configuracoes gerais"
+                        description="Parametros globais e configuracoes da LEVEL."
+                      />
+                    }
+                  />
+
+                  <Route
+                    path="auditoria"
+                    element={
+                      <AdminModulePage
+                        eyebrow="SEGURANCA"
+                        title="Auditoria e logs"
+                        description="Historico de acoes administrativas e eventos do sistema."
+                      />
+                    }
+                  />
+                </Route>
+
+                <Route
+                  path="/app/admin/*"
                   element={
                     <Navigate
                       to="/app/controle"
@@ -299,6 +452,7 @@ function App() {
                     />
                   }
                 />
+
               </Routes>
             </AdminProvider>
           </CourseProvider>

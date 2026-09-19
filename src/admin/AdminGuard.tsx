@@ -18,8 +18,8 @@ export function AdminGuard({
 
   if (loading) {
     return (
-      <div className="level-permission-loading">
-        Verificando acesso...
+      <div className="director-loading">
+        Verificando acesso da direcao...
       </div>
     )
   }
