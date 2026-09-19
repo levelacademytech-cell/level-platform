@@ -70,6 +70,10 @@ import {
 } from './pages/admin/AdminCommunicationsPage'
 
 import {
+  AdminContentsPage,
+} from './pages/admin/AdminContentsPage'
+
+import {
   AdminModulePage,
 } from './pages/admin/AdminModulePage'
 
@@ -325,11 +329,7 @@ function App() {
                   <Route
                     path="conteudos"
                     element={
-                      <AdminModulePage
-                        eyebrow="ACADEMICO"
-                        title="Disciplinas e conteudos"
-                        description="Aulas, disciplinas, bibliotecas, atividades e materiais."
-                      />
+                      <AdminContentsPage />
                     }
                   />
 
