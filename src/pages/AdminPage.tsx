@@ -1,7 +1,10 @@
 import {
+  Check,
   FileSearch,
+  FileX2,
   ShieldCheck,
   Users,
+  X,
 } from 'lucide-react'
 
 import {
@@ -17,29 +20,66 @@ import {
   supabase,
 } from '../lib/supabase'
 
-interface RequestRow {
+
+type AnalysisRequest = {
   id: string
   title: string
   status: string
   requested_at: string
 }
 
+
+type DeleteRequest = {
+  id: string
+  document_id: string | null
+  requester_id: string
+  original_name: string
+  storage_path: string
+  reason: string | null
+  status: string
+  requested_at: string
+}
+
+
 export function AdminPage() {
   const {
+    user,
     isAdmin,
     roles,
   } = useAuth()
 
-  const [users, setUsers] =
-    useState(0)
+  const [
+    users,
+    setUsers,
+  ] = useState(0)
 
-  const [requests, setRequests] =
-    useState<RequestRow[]>([])
+  const [
+    analysisRequests,
+    setAnalysisRequests,
+  ] =
+    useState<AnalysisRequest[]>([])
 
-  useEffect(() => {
+  const [
+    deletionRequests,
+    setDeletionRequests,
+  ] =
+    useState<DeleteRequest[]>([])
+
+  const [
+    message,
+    setMessage,
+  ] =
+    useState('')
+
+
+  async function load() {
     if (!isAdmin) return
 
-    void Promise.all([
+    const [
+      userResult,
+      analysisResult,
+      deletionResult,
+    ] = await Promise.all([
       supabase
         .from('profiles')
         .select(
@@ -66,42 +106,228 @@ export function AdminPage() {
             ascending: false,
           }
         )
-        .limit(10),
-    ]).then(
-      ([
-        userResult,
-        requestResult,
-      ]) => {
-        setUsers(
-          userResult.count ?? 0
+        .limit(20),
+
+      supabase
+        .from(
+          'adv_document_deletion_requests'
+        )
+        .select(`
+          id,
+          document_id,
+          requester_id,
+          original_name,
+          storage_path,
+          reason,
+          status,
+          requested_at
+        `)
+        .eq(
+          'status',
+          'pending'
+        )
+        .order(
+          'requested_at',
+          {
+            ascending: false,
+          }
+        ),
+    ])
+
+    setUsers(
+      userResult.count ?? 0
+    )
+
+    setAnalysisRequests(
+      analysisResult.data ?? []
+    )
+
+    setDeletionRequests(
+      deletionResult.data ?? []
+    )
+  }
+
+
+  useEffect(() => {
+    void load()
+  }, [isAdmin])
+
+
+  async function approveDeletion(
+    request: DeleteRequest
+  ) {
+    if (!user) return
+
+    const confirmed =
+      window.confirm(
+        `Excluir definitivamente "${request.original_name}"?`
+      )
+
+    if (!confirmed) return
+
+    setMessage(
+      'Excluindo documento...'
+    )
+
+    const {
+      error: storageError,
+    } =
+      await supabase.storage
+        .from(
+          'level-adv-documents'
+        )
+        .remove([
+          request.storage_path,
+        ])
+
+    if (storageError) {
+      setMessage(
+        storageError.message
+      )
+
+      return
+    }
+
+
+    if (request.document_id) {
+      const {
+        error: databaseError,
+      } =
+        await supabase
+          .from(
+            'adv_documents'
+          )
+          .delete()
+          .eq(
+            'id',
+            request.document_id
+          )
+
+      if (databaseError) {
+        setMessage(
+          databaseError.message
         )
 
-        setRequests(
-          (requestResult.data ??
-            []) as RequestRow[]
-        )
+        return
       }
+    }
+
+
+    const {
+      error,
+    } =
+      await supabase
+        .from(
+          'adv_document_deletion_requests'
+        )
+        .update({
+          status:
+            'approved',
+
+          reviewed_at:
+            new Date()
+              .toISOString(),
+
+          reviewed_by:
+            user.id,
+
+          admin_note:
+            'Exclusão aprovada pelo administrador.',
+        })
+        .eq(
+          'id',
+          request.id
+        )
+
+    if (error) {
+      setMessage(
+        error.message
+      )
+
+      return
+    }
+
+    setMessage(
+      'Documento excluído definitivamente.'
     )
-  }, [isAdmin])
+
+    await load()
+  }
+
+
+  async function rejectDeletion(
+    request: DeleteRequest
+  ) {
+    if (!user) return
+
+    const note =
+      window.prompt(
+        'Motivo da recusa:',
+        'Documento mantido pela administração.'
+      )
+
+    if (note === null) {
+      return
+    }
+
+    const {
+      error,
+    } =
+      await supabase
+        .from(
+          'adv_document_deletion_requests'
+        )
+        .update({
+          status:
+            'rejected',
+
+          reviewed_at:
+            new Date()
+              .toISOString(),
+
+          reviewed_by:
+            user.id,
+
+          admin_note:
+            note.trim() ||
+            null,
+        })
+        .eq(
+          'id',
+          request.id
+        )
+
+    if (error) {
+      setMessage(
+        error.message
+      )
+
+      return
+    }
+
+    setMessage(
+      'Solicitação recusada.'
+    )
+
+    await load()
+  }
+
 
   if (!isAdmin) {
     return (
       <div className="page">
         <div className="module-coming">
-          <ShieldCheck
-            size={34}
-          />
-
-          <h2>
-            Acesso restrito
-          </h2>
+          <ShieldCheck size={34} />
+          <h2>Acesso restrito</h2>
         </div>
       </div>
     )
   }
 
+
   return (
     <div className="page">
+
       <div className="page-heading">
         <span className="eyebrow">
           ADMINISTRACAO
@@ -112,18 +338,26 @@ export function AdminPage() {
         </h1>
 
         <p>
-          Controle de usuarios,
-          solicitacoes e operacao da
-          plataforma.
+          Controle operacional da plataforma,
+          usuários, análises e documentos.
         </p>
       </div>
 
+
+      {message && (
+        <div className="system-message">
+          {message}
+        </div>
+      )}
+
+
       <div className="stats-grid admin-stats">
+
         <article>
           <Users size={20} />
 
           <span>
-            Usuarios cadastrados
+            USUÁRIOS
           </span>
 
           <strong>
@@ -131,34 +365,151 @@ export function AdminPage() {
           </strong>
         </article>
 
+
         <article>
           <FileSearch size={20} />
 
           <span>
-            Solicitacoes
+            ANÁLISES
           </span>
 
           <strong>
-            {requests.length}
+            {
+              analysisRequests.length
+            }
           </strong>
         </article>
 
+
         <article>
-          <ShieldCheck
-            size={20}
-          />
+          <FileX2 size={20} />
 
           <span>
-            Seu acesso
+            EXCLUSÕES PENDENTES
+          </span>
+
+          <strong>
+            {
+              deletionRequests.length
+            }
+          </strong>
+        </article>
+
+
+        <article>
+          <ShieldCheck size={20} />
+
+          <span>
+            SEU ACESSO
           </span>
 
           <strong>
             ADMIN
           </strong>
         </article>
+
       </div>
 
-      <section className="panel">
+
+      <section className="panel admin-section">
+
+        <div className="panel-heading">
+          <div>
+            <span className="eyebrow">
+              DOCUMENTOS
+            </span>
+
+            <h2>
+              Solicitações de exclusão
+            </h2>
+          </div>
+        </div>
+
+
+        {deletionRequests.length === 0 && (
+          <div className="empty-state compact">
+            Nenhuma solicitação pendente.
+          </div>
+        )}
+
+
+        <div className="admin-request-list">
+
+          {deletionRequests.map(
+            (request) => (
+              <article
+                key={request.id}
+                className="admin-request-item"
+              >
+
+                <div>
+                  <span className="case-type">
+                    EXCLUSÃO DE DOCUMENTO
+                  </span>
+
+                  <strong>
+                    {request.original_name}
+                  </strong>
+
+                  <p>
+                    {request.reason ||
+                      'Nenhum motivo informado.'}
+                  </p>
+
+                  <small>
+                    {new Date(
+                      request.requested_at
+                    ).toLocaleString(
+                      'pt-BR'
+                    )}
+                  </small>
+                </div>
+
+
+                <div className="admin-request-actions">
+
+                  <button
+                    type="button"
+                    className="approve-button"
+                    onClick={() =>
+                      void approveDeletion(
+                        request
+                      )
+                    }
+                  >
+                    <Check size={15} />
+
+                    Aprovar
+                  </button>
+
+
+                  <button
+                    type="button"
+                    className="reject-button"
+                    onClick={() =>
+                      void rejectDeletion(
+                        request
+                      )
+                    }
+                  >
+                    <X size={15} />
+
+                    Recusar
+                  </button>
+
+                </div>
+
+              </article>
+            )
+          )}
+
+        </div>
+
+      </section>
+
+
+      <section className="panel admin-section">
+
         <div className="panel-heading">
           <div>
             <span className="eyebrow">
@@ -166,36 +517,33 @@ export function AdminPage() {
             </span>
 
             <h2>
-              Solicitacoes recentes
+              Solicitações recentes
             </h2>
           </div>
         </div>
 
-        {requests.length ===
-          0 && (
-          <div className="empty-state">
-            Nenhuma solicitacao
-            recebida.
+
+        {analysisRequests.length === 0 && (
+          <div className="empty-state compact">
+            Nenhuma solicitação recebida.
           </div>
         )}
 
+
         <div className="simple-list">
-          {requests.map(
+
+          {analysisRequests.map(
             (request) => (
               <article
                 key={request.id}
               >
                 <div>
                   <strong>
-                    {
-                      request.title
-                    }
+                    {request.title}
                   </strong>
 
                   <span>
-                    {
-                      request.status
-                    }
+                    {request.status}
                   </span>
                 </div>
 
@@ -209,25 +557,22 @@ export function AdminPage() {
               </article>
             )
           )}
+
         </div>
+
       </section>
 
-      <section className="panel">
+
+      <section className="panel admin-section">
         <span className="eyebrow">
-          PERMISSOES ATUAIS
+          PERMISSOES
         </span>
 
         <p className="muted">
           {roles.join(' / ')}
         </p>
-
-        <p className="muted">
-          O cadastro, bloqueio e
-          suspensao de usuarios sera
-          o proximo modulo
-          administrativo.
-        </p>
       </section>
+
     </div>
   )
 }
