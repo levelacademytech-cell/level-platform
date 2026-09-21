@@ -1,9 +1,14 @@
 import {
   ArrowLeft,
   Eye,
+  File,
+  FileSpreadsheet,
+  FileText,
   Heart,
+  Image as ImageIcon,
   Lock,
   MessageSquare,
+  Paperclip,
   Pin,
   Plus,
   Search,
@@ -11,6 +16,7 @@ import {
   ShieldCheck,
   Trash2,
   Unlock,
+  UploadCloud,
   Users,
   X,
 } from 'lucide-react'
@@ -19,6 +25,11 @@ import {
   useEffect,
   useMemo,
   useState,
+} from 'react'
+
+import type {
+  ChangeEvent,
+  DragEvent,
 } from 'react'
 
 import {
@@ -66,6 +77,20 @@ type PostRow = {
 }
 
 
+type AttachmentRow = {
+  id: string
+  topic_id: string | null
+  post_id: string | null
+  uploader_id: string
+  storage_path: string
+  original_name: string
+  mime_type: string | null
+  size_bytes: number
+  created_at: string
+  signed_url?: string | null
+}
+
+
 const categories = [
   { value: 'all', label: 'Todos' },
   { value: 'geral', label: 'Geral' },
@@ -77,6 +102,24 @@ const categories = [
   { value: 'penal', label: 'Penal' },
   { value: 'processual', label: 'Processual' },
 ]
+
+
+const allowedExtensions = [
+  'jpg',
+  'jpeg',
+  'png',
+  'webp',
+  'pdf',
+  'doc',
+  'docx',
+  'xls',
+  'xlsx',
+  'csv',
+]
+
+
+const MAX_FILES = 5
+const MAX_SIZE = 15 * 1024 * 1024
 
 
 function categoryLabel(
@@ -110,6 +153,73 @@ function dateTime(
 }
 
 
+function extension(
+  name: string
+) {
+  return (
+    name
+      .split('.')
+      .pop()
+      ?.toLowerCase() ??
+    ''
+  )
+}
+
+
+function isImage(
+  attachment:
+    AttachmentRow
+) {
+  return (
+    attachment.mime_type
+      ?.startsWith('image/') ??
+    false
+  )
+}
+
+
+function formatBytes(
+  bytes: number
+) {
+  if (
+    bytes < 1024
+  ) {
+    return `${bytes} B`
+  }
+
+  if (
+    bytes <
+    1024 * 1024
+  ) {
+    return `${(
+      bytes / 1024
+    ).toFixed(1)} KB`
+  }
+
+  return `${(
+    bytes /
+    1024 /
+    1024
+  ).toFixed(1)} MB`
+}
+
+
+function sanitizeName(
+  name: string
+) {
+  return name
+    .normalize('NFD')
+    .replace(
+      /[\u0300-\u036f]/g,
+      ''
+    )
+    .replace(
+      /[^a-zA-Z0-9._-]/g,
+      '-'
+    )
+}
+
+
 export function ForumPage() {
   const {
     topicId,
@@ -130,13 +240,17 @@ export function ForumPage() {
   ] =
     useState<TopicRow[]>([])
 
-
   const [
     posts,
     setPosts,
   ] =
     useState<PostRow[]>([])
 
+  const [
+    attachments,
+    setAttachments,
+  ] =
+    useState<AttachmentRow[]>([])
 
   const [
     search,
@@ -144,13 +258,11 @@ export function ForumPage() {
   ] =
     useState('')
 
-
   const [
     category,
     setCategory,
   ] =
     useState('all')
-
 
   const [
     newTopicOpen,
@@ -158,13 +270,11 @@ export function ForumPage() {
   ] =
     useState(false)
 
-
   const [
     newTitle,
     setNewTitle,
   ] =
     useState('')
-
 
   const [
     newCategory,
@@ -172,13 +282,11 @@ export function ForumPage() {
   ] =
     useState('geral')
 
-
   const [
     newTags,
     setNewTags,
   ] =
     useState('')
-
 
   const [
     newBody,
@@ -186,6 +294,11 @@ export function ForumPage() {
   ] =
     useState('')
 
+  const [
+    topicFiles,
+    setTopicFiles,
+  ] =
+    useState<File[]>([])
 
   const [
     reply,
@@ -193,6 +306,11 @@ export function ForumPage() {
   ] =
     useState('')
 
+  const [
+    replyFiles,
+    setReplyFiles,
+  ] =
+    useState<File[]>([])
 
   const [
     message,
@@ -200,12 +318,19 @@ export function ForumPage() {
   ] =
     useState('')
 
-
   const [
     loading,
     setLoading,
   ] =
     useState(true)
+
+  const [
+    previewImage,
+    setPreviewImage,
+  ] =
+    useState<string | null>(
+      null
+    )
 
 
   const currentTopic =
@@ -246,6 +371,7 @@ export function ForumPage() {
         }
       )
 
+
     if (error) {
       setMessage(
         error.message
@@ -256,11 +382,117 @@ export function ForumPage() {
       return
     }
 
+
     setTopics(
       (data ?? []) as TopicRow[]
     )
 
     setLoading(false)
+  }
+
+
+  async function signedAttachments(
+    rows:
+      AttachmentRow[]
+  ) {
+    return Promise.all(
+      rows.map(
+        async (item) => {
+          const {
+            data,
+          } =
+            await supabase.storage
+              .from(
+                'level-adv-forum'
+              )
+              .createSignedUrl(
+                item.storage_path,
+                1800
+              )
+
+          return {
+            ...item,
+
+            signed_url:
+              data?.signedUrl ??
+              null,
+          }
+        }
+      )
+    )
+  }
+
+
+  async function loadAttachments(
+    id: string,
+    postRows:
+      PostRow[]
+  ) {
+    const {
+      data: topicData,
+    } =
+      await supabase
+        .from(
+          'adv_forum_attachments'
+        )
+        .select('*')
+        .eq(
+          'topic_id',
+          id
+        )
+        .order(
+          'created_at'
+        )
+
+
+    let replyData:
+      AttachmentRow[] = []
+
+
+    const postIds =
+      postRows.map(
+        (item) =>
+          item.id
+      )
+
+
+    if (
+      postIds.length > 0
+    ) {
+      const {
+        data,
+      } =
+        await supabase
+          .from(
+            'adv_forum_attachments'
+          )
+          .select('*')
+          .in(
+            'post_id',
+            postIds
+          )
+          .order(
+            'created_at'
+          )
+
+      replyData =
+        (data ?? []) as AttachmentRow[]
+    }
+
+
+    const rows = [
+      ...(
+        (topicData ?? []) as AttachmentRow[]
+      ),
+      ...replyData,
+    ]
+
+
+    setAttachments(
+      await signedAttachments(
+        rows
+      )
+    )
   }
 
 
@@ -279,6 +511,7 @@ export function ForumPage() {
         }
       )
 
+
     if (error) {
       setMessage(
         error.message
@@ -287,8 +520,16 @@ export function ForumPage() {
       return
     }
 
-    setPosts(
+
+    const rows =
       (data ?? []) as PostRow[]
+
+
+    setPosts(rows)
+
+    await loadAttachments(
+      id,
+      rows
     )
   }
 
@@ -321,6 +562,7 @@ export function ForumPage() {
   useEffect(() => {
     if (!topicId) {
       setPosts([])
+      setAttachments([])
       return
     }
 
@@ -338,13 +580,267 @@ export function ForumPage() {
   }, [topicId])
 
 
+  function addFiles(
+    current: File[],
+    incoming: FileList |
+      File[]
+  ) {
+    const incomingArray =
+      Array.from(incoming)
+
+    const accepted:
+      File[] = []
+
+
+    for (
+      const file of
+      incomingArray
+    ) {
+      const ext =
+        extension(
+          file.name
+        )
+
+      if (
+        !allowedExtensions.includes(
+          ext
+        )
+      ) {
+        setMessage(
+          `Arquivo não permitido: ${file.name}`
+        )
+
+        continue
+      }
+
+
+      if (
+        file.size >
+        MAX_SIZE
+      ) {
+        setMessage(
+          `${file.name} excede o limite de 15 MB.`
+        )
+
+        continue
+      }
+
+
+      accepted.push(
+        file
+      )
+    }
+
+
+    const combined = [
+      ...current,
+      ...accepted,
+    ].slice(
+      0,
+      MAX_FILES
+    )
+
+
+    if (
+      current.length +
+      accepted.length >
+      MAX_FILES
+    ) {
+      setMessage(
+        'É possível anexar até 5 arquivos por publicação.'
+      )
+    }
+
+
+    return combined
+  }
+
+
+  function handleTopicFiles(
+    event:
+      ChangeEvent<HTMLInputElement>
+  ) {
+    if (
+      !event.target.files
+    ) {
+      return
+    }
+
+    setTopicFiles(
+      (current) =>
+        addFiles(
+          current,
+          event.target.files!
+        )
+    )
+
+    event.target.value = ''
+  }
+
+
+  function handleReplyFiles(
+    event:
+      ChangeEvent<HTMLInputElement>
+  ) {
+    if (
+      !event.target.files
+    ) {
+      return
+    }
+
+    setReplyFiles(
+      (current) =>
+        addFiles(
+          current,
+          event.target.files!
+        )
+    )
+
+    event.target.value = ''
+  }
+
+
+  function dropTopicFiles(
+    event:
+      DragEvent<HTMLDivElement>
+  ) {
+    event.preventDefault()
+
+    setTopicFiles(
+      (current) =>
+        addFiles(
+          current,
+          event.dataTransfer.files
+        )
+    )
+  }
+
+
+  function dropReplyFiles(
+    event:
+      DragEvent<HTMLDivElement>
+  ) {
+    event.preventDefault()
+
+    setReplyFiles(
+      (current) =>
+        addFiles(
+          current,
+          event.dataTransfer.files
+        )
+    )
+  }
+
+
+  async function uploadFiles(
+    files: File[],
+    targetTopicId:
+      string | null,
+    targetPostId:
+      string | null
+  ) {
+    if (
+      !user ||
+      files.length === 0
+    ) {
+      return
+    }
+
+
+    for (
+      const file of files
+    ) {
+      const parent =
+        targetPostId ??
+        'topic'
+
+      const storagePath =
+        `${user.id}/${targetTopicId ?? topicId ?? 'forum'}/${parent}/${crypto.randomUUID()}-${sanitizeName(file.name)}`
+
+
+      const {
+        error:
+          storageError,
+      } =
+        await supabase.storage
+          .from(
+            'level-adv-forum'
+          )
+          .upload(
+            storagePath,
+            file,
+            {
+              contentType:
+                file.type ||
+                undefined,
+
+              upsert: false,
+            }
+          )
+
+
+      if (storageError) {
+        throw storageError
+      }
+
+
+      const {
+        error:
+          databaseError,
+      } =
+        await supabase
+          .from(
+            'adv_forum_attachments'
+          )
+          .insert({
+            topic_id:
+              targetTopicId,
+
+            post_id:
+              targetPostId,
+
+            uploader_id:
+              user.id,
+
+            storage_path:
+              storagePath,
+
+            original_name:
+              file.name,
+
+            mime_type:
+              file.type ||
+              null,
+
+            size_bytes:
+              file.size,
+          })
+
+
+      if (databaseError) {
+        await supabase.storage
+          .from(
+            'level-adv-forum'
+          )
+          .remove([
+            storagePath,
+          ])
+
+        throw databaseError
+      }
+    }
+  }
+
+
   async function createTopic() {
     if (!user) {
       return
     }
 
+
     if (
-      newTitle.trim().length < 5
+      newTitle.trim().length <
+      5
     ) {
       setMessage(
         'O título precisa ter pelo menos 5 caracteres.'
@@ -353,8 +849,10 @@ export function ForumPage() {
       return
     }
 
+
     if (
-      newBody.trim().length < 10
+      newBody.trim().length <
+      10
     ) {
       setMessage(
         'Descreva melhor o assunto da discussão.'
@@ -362,6 +860,7 @@ export function ForumPage() {
 
       return
     }
+
 
     const tags =
       newTags
@@ -415,11 +914,31 @@ export function ForumPage() {
     }
 
 
+    try {
+      await uploadFiles(
+        topicFiles,
+        data.id,
+        null
+      )
+    } catch (
+      uploadError
+    ) {
+      setMessage(
+        uploadError
+          instanceof Error
+          ? `Tópico criado, mas ocorreu erro no anexo: ${uploadError.message}`
+          : 'Tópico criado, mas ocorreu erro no envio de um anexo.'
+      )
+    }
+
+
     setNewTopicOpen(false)
     setNewTitle('')
     setNewCategory('geral')
     setNewTags('')
     setNewBody('')
+    setTopicFiles([])
+
 
     navigate(
       `/app/forum/${data.id}`
@@ -438,6 +957,7 @@ export function ForumPage() {
 
 
     const {
+      data,
       error,
     } =
       await supabase
@@ -454,6 +974,8 @@ export function ForumPage() {
           body:
             reply.trim(),
         })
+        .select('id')
+        .single()
 
 
     if (error) {
@@ -465,7 +987,27 @@ export function ForumPage() {
     }
 
 
+    try {
+      await uploadFiles(
+        replyFiles,
+        null,
+        data.id
+      )
+    } catch (
+      uploadError
+    ) {
+      setMessage(
+        uploadError
+          instanceof Error
+          ? `Resposta publicada, mas ocorreu erro no anexo: ${uploadError.message}`
+          : 'Resposta publicada, mas ocorreu erro no anexo.'
+      )
+    }
+
+
     setReply('')
+    setReplyFiles([])
+
 
     await Promise.all([
       loadPosts(topicId),
@@ -488,6 +1030,7 @@ export function ForumPage() {
         }
       )
 
+
     if (error) {
       setMessage(
         error.message
@@ -496,14 +1039,83 @@ export function ForumPage() {
       return
     }
 
+
     await loadTopics(
       Boolean(topicId)
     )
   }
 
 
+  async function deleteAttachment(
+    attachment:
+      AttachmentRow
+  ) {
+    const confirmed =
+      window.confirm(
+        `Excluir o anexo "${attachment.original_name}"?`
+      )
+
+    if (!confirmed) {
+      return
+    }
+
+
+    const {
+      error:
+        storageError,
+    } =
+      await supabase.storage
+        .from(
+          'level-adv-forum'
+        )
+        .remove([
+          attachment.storage_path,
+        ])
+
+
+    if (storageError) {
+      setMessage(
+        storageError.message
+      )
+
+      return
+    }
+
+
+    const {
+      error,
+    } =
+      await supabase
+        .from(
+          'adv_forum_attachments'
+        )
+        .delete()
+        .eq(
+          'id',
+          attachment.id
+        )
+
+
+    if (error) {
+      setMessage(
+        error.message
+      )
+
+      return
+    }
+
+
+    if (topicId) {
+      await loadPosts(
+        topicId
+      )
+    }
+  }
+
+
   async function deleteTopic(
-    topic: TopicRow
+    topic:
+      TopicRow
   ) {
     const confirmed =
       window.confirm(
@@ -512,6 +1124,24 @@ export function ForumPage() {
 
     if (!confirmed) {
       return
+    }
+
+
+    const paths =
+      attachments.map(
+        (item) =>
+          item.storage_path
+      )
+
+
+    if (
+      paths.length > 0
+    ) {
+      await supabase.storage
+        .from(
+          'level-adv-forum'
+        )
+        .remove(paths)
     }
 
 
@@ -541,13 +1171,12 @@ export function ForumPage() {
     navigate(
       '/app/forum'
     )
-
-    await loadTopics()
   }
 
 
   async function deletePost(
-    post: PostRow
+    post:
+      PostRow
   ) {
     const confirmed =
       window.confirm(
@@ -556,6 +1185,30 @@ export function ForumPage() {
 
     if (!confirmed) {
       return
+    }
+
+
+    const postFiles =
+      attachments.filter(
+        (item) =>
+          item.post_id ===
+          post.id
+      )
+
+
+    if (
+      postFiles.length > 0
+    ) {
+      await supabase.storage
+        .from(
+          'level-adv-forum'
+        )
+        .remove(
+          postFiles.map(
+            (item) =>
+              item.storage_path
+          )
+        )
     }
 
 
@@ -591,7 +1244,8 @@ export function ForumPage() {
 
 
   async function togglePinned(
-    topic: TopicRow
+    topic:
+      TopicRow
   ) {
     const {
       error,
@@ -624,7 +1278,8 @@ export function ForumPage() {
 
 
   async function toggleLocked(
-    topic: TopicRow
+    topic:
+      TopicRow
   ) {
     const {
       error,
@@ -656,12 +1311,282 @@ export function ForumPage() {
   }
 
 
+  function fileIcon(
+    attachment:
+      AttachmentRow
+  ) {
+    const ext =
+      extension(
+        attachment.original_name
+      )
+
+
+    if (
+      isImage(
+        attachment
+      )
+    ) {
+      return (
+        <ImageIcon
+          size={18}
+        />
+      )
+    }
+
+
+    if (
+      ext === 'xls' ||
+      ext === 'xlsx' ||
+      ext === 'csv'
+    ) {
+      return (
+        <FileSpreadsheet
+          size={18}
+        />
+      )
+    }
+
+
+    if (
+      ext === 'pdf' ||
+      ext === 'doc' ||
+      ext === 'docx'
+    ) {
+      return (
+        <FileText
+          size={18}
+        />
+      )
+    }
+
+
+    return (
+      <File size={18} />
+    )
+  }
+
+
+  function AttachmentGallery({
+    rows,
+  }: {
+    rows:
+      AttachmentRow[]
+  }) {
+    if (
+      rows.length === 0
+    ) {
+      return null
+    }
+
+
+    return (
+      <div className="forum-attachments">
+
+        {rows.map(
+          (item) => (
+            <article
+              key={item.id}
+              className={
+                isImage(item)
+                  ? 'forum-attachment image'
+                  : 'forum-attachment document'
+              }
+            >
+
+              {isImage(item) &&
+              item.signed_url ? (
+                <button
+                  type="button"
+                  className="forum-image-preview"
+                  onClick={() =>
+                    setPreviewImage(
+                      item.signed_url ??
+                      null
+                    )
+                  }
+                >
+                  <img
+                    src={
+                      item.signed_url
+                    }
+                    alt={
+                      item.original_name
+                    }
+                  />
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="forum-file-open"
+                  onClick={() => {
+                    if (
+                      item.signed_url
+                    ) {
+                      window.open(
+                        item.signed_url,
+                        '_blank',
+                        'noopener,noreferrer'
+                      )
+                    }
+                  }}
+                >
+                  <div>
+                    {fileIcon(item)}
+                  </div>
+
+                  <span>
+                    <strong>
+                      {
+                        item.original_name
+                      }
+                    </strong>
+
+                    <small>
+                      {formatBytes(
+                        item.size_bytes
+                      )}
+                    </small>
+                  </span>
+                </button>
+              )}
+
+
+              {(item.uploader_id ===
+                user?.id ||
+                isAdmin) && (
+                <button
+                  type="button"
+                  className="forum-attachment-delete"
+                  onClick={() =>
+                    void deleteAttachment(
+                      item
+                    )
+                  }
+                  title="Excluir anexo"
+                >
+                  <X size={13} />
+                </button>
+              )}
+
+            </article>
+          )
+        )}
+
+      </div>
+    )
+  }
+
+
+  function PendingFiles({
+    files,
+    onRemove,
+  }: {
+    files: File[]
+    onRemove:
+      (index: number) =>
+        void
+  }) {
+    if (
+      files.length === 0
+    ) {
+      return null
+    }
+
+
+    return (
+      <div className="forum-pending-files">
+
+        {files.map(
+          (
+            file,
+            index
+          ) => (
+            <div
+              key={
+                `${file.name}-${index}`
+              }
+            >
+              <Paperclip
+                size={13}
+              />
+
+              <span>
+                <strong>
+                  {file.name}
+                </strong>
+
+                <small>
+                  {formatBytes(
+                    file.size
+                  )}
+                </small>
+              </span>
+
+              <button
+                type="button"
+                onClick={() =>
+                  onRemove(index)
+                }
+              >
+                <X size={13} />
+              </button>
+            </div>
+          )
+        )}
+
+      </div>
+    )
+  }
+
+
   if (
     topicId &&
     currentTopic
   ) {
+    const topicAttachments =
+      attachments.filter(
+        (item) =>
+          item.topic_id ===
+          currentTopic.id
+      )
+
+
     return (
       <div className="page forum-page">
+
+        {previewImage && (
+          <div
+            className="forum-lightbox"
+            onClick={() =>
+              setPreviewImage(
+                null
+              )
+            }
+          >
+            <button
+              type="button"
+              onClick={() =>
+                setPreviewImage(
+                  null
+                )
+              }
+            >
+              <X size={23} />
+            </button>
+
+            <img
+              src={previewImage}
+              alt="Visualização do anexo"
+              onClick={(
+                event
+              ) =>
+                event
+                  .stopPropagation()
+              }
+            />
+          </div>
+        )}
+
 
         <button
           type="button"
@@ -681,19 +1606,8 @@ export function ForumPage() {
 
 
         {message && (
-          <div className="system-message forum-system-message">
-            <span>
-              {message}
-            </span>
-
-            <button
-              type="button"
-              onClick={() =>
-                setMessage('')
-              }
-            >
-              <X size={14} />
-            </button>
+          <div className="system-message">
+            {message}
           </div>
         )}
 
@@ -708,20 +1622,16 @@ export function ForumPage() {
               )}
             </span>
 
-
             {currentTopic.is_pinned && (
               <span>
                 <Pin size={12} />
-
                 Fixado
               </span>
             )}
 
-
             {currentTopic.is_locked && (
               <span>
                 <Lock size={12} />
-
                 Encerrado
               </span>
             )}
@@ -744,7 +1654,9 @@ export function ForumPage() {
 
             <div>
               <strong>
-                {currentTopic.author_name}
+                {
+                  currentTopic.author_name
+                }
               </strong>
 
               <span>
@@ -764,6 +1676,13 @@ export function ForumPage() {
           <p className="forum-topic-body">
             {currentTopic.body}
           </p>
+
+
+          <AttachmentGallery
+            rows={
+              topicAttachments
+            }
+          />
 
 
           {currentTopic.tags.length >
@@ -803,7 +1722,9 @@ export function ForumPage() {
                   size={15}
                 />
 
-                {currentTopic.likes_count}
+                {
+                  currentTopic.likes_count
+                }
               </button>
 
 
@@ -812,14 +1733,18 @@ export function ForumPage() {
                   size={15}
                 />
 
-                {currentTopic.replies_count}
+                {
+                  currentTopic.replies_count
+                }
               </span>
 
 
               <span className="forum-stat">
                 <Eye size={15} />
 
-                {currentTopic.views_count}
+                {
+                  currentTopic.views_count
+                }
               </span>
 
             </div>
@@ -859,7 +1784,6 @@ export function ForumPage() {
                 MODERAÇÃO
               </span>
 
-
               <button
                 type="button"
                 onClick={() =>
@@ -875,7 +1799,6 @@ export function ForumPage() {
                   : 'Fixar tópico'}
               </button>
 
-
               <button
                 type="button"
                 onClick={() =>
@@ -884,17 +1807,15 @@ export function ForumPage() {
                   )
                 }
               >
-                {currentTopic.is_locked
-                  ? (
-                    <Unlock
-                      size={14}
-                    />
-                  )
-                  : (
-                    <Lock
-                      size={14}
-                    />
-                  )}
+                {currentTopic.is_locked ? (
+                  <Unlock
+                    size={14}
+                  />
+                ) : (
+                  <Lock
+                    size={14}
+                  />
+                )}
 
                 {currentTopic.is_locked
                   ? 'Reabrir discussão'
@@ -941,8 +1862,8 @@ export function ForumPage() {
               </strong>
 
               <span>
-                Seja o primeiro a contribuir
-                com esta discussão.
+                Seja o primeiro a
+                contribuir.
               </span>
 
             </div>
@@ -950,68 +1871,88 @@ export function ForumPage() {
 
 
           {posts.map(
-            (post) => (
-              <article
-                key={post.id}
-                className="forum-reply"
-              >
+            (post) => {
 
-                <div className="forum-avatar">
-                  {post.author_name
-                    .charAt(0)
-                    .toUpperCase()}
-                </div>
+              const postAttachments =
+                attachments.filter(
+                  (item) =>
+                    item.post_id ===
+                    post.id
+                )
 
 
-                <div>
+              return (
+                <article
+                  key={post.id}
+                  className="forum-reply"
+                >
 
-                  <header>
-
-                    <div>
-                      <strong>
-                        {post.author_name}
-                      </strong>
-
-                      <span>
-                        {post.username
-                          ? `@${post.username} · `
-                          : ''}
-
-                        {dateTime(
-                          post.created_at
-                        )}
-                      </span>
-                    </div>
+                  <div className="forum-avatar">
+                    {post.author_name
+                      .charAt(0)
+                      .toUpperCase()}
+                  </div>
 
 
-                    {(post.author_id ===
-                      user?.id ||
-                      isAdmin) && (
-                      <button
-                        type="button"
-                        onClick={() =>
-                          void deletePost(
-                            post
-                          )
-                        }
-                      >
-                        <Trash2
-                          size={14}
-                        />
-                      </button>
-                    )}
+                  <div>
 
-                  </header>
+                    <header>
+
+                      <div>
+                        <strong>
+                          {
+                            post.author_name
+                          }
+                        </strong>
+
+                        <span>
+                          {post.username
+                            ? `@${post.username} · `
+                            : ''}
+
+                          {dateTime(
+                            post.created_at
+                          )}
+                        </span>
+                      </div>
 
 
-                  <p>
-                    {post.body}
-                  </p>
+                      {(post.author_id ===
+                        user?.id ||
+                        isAdmin) && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            void deletePost(
+                              post
+                            )
+                          }
+                        >
+                          <Trash2
+                            size={14}
+                          />
+                        </button>
+                      )}
 
-                </div>
+                    </header>
 
-              </article>
-            )
+
+                    <p>
+                      {post.body}
+                    </p>
+
+
+                    <AttachmentGallery
+                      rows={
+                        postAttachments
+                      }
+                    />
+
+                  </div>
+
+                </article>
+              )
+            }
           )}
 
 
@@ -1027,6 +1968,71 @@ export function ForumPage() {
                   )
                 }
                 placeholder="Escreva sua contribuição para esta discussão..."
+              />
+
+
+              <div
+                className="forum-upload-zone compact"
+                onDragOver={(
+                  event
+                ) =>
+                  event
+                    .preventDefault()
+                }
+                onDrop={
+                  dropReplyFiles
+                }
+              >
+                <Paperclip
+                  size={18}
+                />
+
+                <div>
+                  <strong>
+                    Anexar arquivo
+                  </strong>
+
+                  <span>
+                    Imagem, PDF, Word,
+                    Excel ou CSV
+                  </span>
+                </div>
+
+                <label>
+                  Selecionar
+
+                  <input
+                    hidden
+                    type="file"
+                    multiple
+                    accept=".jpg,.jpeg,.png,.webp,.pdf,.doc,.docx,.xls,.xlsx,.csv"
+                    onChange={
+                      handleReplyFiles
+                    }
+                  />
+                </label>
+              </div>
+
+
+              <PendingFiles
+                files={
+                  replyFiles
+                }
+                onRemove={(
+                  index
+                ) =>
+                  setReplyFiles(
+                    (current) =>
+                      current.filter(
+                        (
+                          _,
+                          itemIndex
+                        ) =>
+                          itemIndex !==
+                          index
+                      )
+                  )
+                }
               />
 
 
@@ -1057,8 +2063,8 @@ export function ForumPage() {
                 </strong>
 
                 <span>
-                  O conteúdo continua disponível
-                  para consulta.
+                  O histórico permanece
+                  disponível.
                 </span>
               </div>
 
@@ -1087,9 +2093,10 @@ export function ForumPage() {
           </h1>
 
           <p>
-            Discussões, dúvidas, interpretações,
-            estratégias e conhecimento entre
-            membros da equipe.
+            Discussões, dúvidas,
+            interpretações, estratégias
+            e conhecimento entre membros
+            da equipe.
           </p>
         </div>
 
@@ -1098,9 +2105,7 @@ export function ForumPage() {
           type="button"
           className="primary-button"
           onClick={() =>
-            setNewTopicOpen(
-              true
-            )
+            setNewTopicOpen(true)
           }
         >
           <Plus size={16} />
@@ -1112,19 +2117,8 @@ export function ForumPage() {
 
 
       {message && (
-        <div className="system-message forum-system-message">
-          <span>
-            {message}
-          </span>
-
-          <button
-            type="button"
-            onClick={() =>
-              setMessage('')
-            }
-          >
-            <X size={14} />
-          </button>
+        <div className="system-message">
+          {message}
         </div>
       )}
 
@@ -1144,13 +2138,10 @@ export function ForumPage() {
               </h2>
             </div>
 
-
             <button
               type="button"
               onClick={() =>
-                setNewTopicOpen(
-                  false
-                )
+                setNewTopicOpen(false)
               }
             >
               <X size={18} />
@@ -1246,15 +2237,81 @@ export function ForumPage() {
           </label>
 
 
+          <div
+            className="forum-upload-zone"
+            onDragOver={(
+              event
+            ) =>
+              event
+                .preventDefault()
+            }
+            onDrop={
+              dropTopicFiles
+            }
+          >
+            <UploadCloud
+              size={27}
+            />
+
+            <div>
+              <strong>
+                Anexar documentos ou fotos
+              </strong>
+
+              <span>
+                Arraste aqui ou selecione
+                arquivos. JPG, PNG, WEBP,
+                PDF, Word, Excel e CSV.
+                Até 5 arquivos • 15 MB cada.
+              </span>
+            </div>
+
+
+            <label>
+              Selecionar arquivos
+
+              <input
+                hidden
+                type="file"
+                multiple
+                accept=".jpg,.jpeg,.png,.webp,.pdf,.doc,.docx,.xls,.xlsx,.csv"
+                onChange={
+                  handleTopicFiles
+                }
+              />
+            </label>
+          </div>
+
+
+          <PendingFiles
+            files={
+              topicFiles
+            }
+            onRemove={(
+              index
+            ) =>
+              setTopicFiles(
+                (current) =>
+                  current.filter(
+                    (
+                      _,
+                      itemIndex
+                    ) =>
+                      itemIndex !==
+                      index
+                  )
+              )
+            }
+          />
+
+
           <div className="forum-form-actions">
 
             <button
               type="button"
               className="secondary-button"
               onClick={() =>
-                setNewTopicOpen(
-                  false
-                )
+                setNewTopicOpen(false)
               }
             >
               Cancelar
@@ -1354,8 +2411,7 @@ export function ForumPage() {
 
 
         {!loading &&
-          topics.length ===
-            0 && (
+          topics.length === 0 && (
             <div className="forum-empty">
 
               <MessageSquare
@@ -1367,8 +2423,8 @@ export function ForumPage() {
               </strong>
 
               <span>
-                Crie o primeiro tópico do
-                escritório.
+                Crie o primeiro tópico
+                do escritório.
               </span>
 
             </div>
@@ -1405,14 +2461,12 @@ export function ForumPage() {
                       )}
                     </span>
 
-
                     {topic.is_pinned && (
                       <span>
                         <Pin size={11} />
                         FIXADO
                       </span>
                     )}
-
 
                     {topic.is_locked && (
                       <span>
@@ -1428,7 +2482,6 @@ export function ForumPage() {
                     {topic.title}
                   </h2>
 
-
                   <p>
                     {topic.body}
                   </p>
@@ -1438,7 +2491,9 @@ export function ForumPage() {
 
                     <div>
                       <strong>
-                        {topic.author_name}
+                        {
+                          topic.author_name
+                        }
                       </strong>
 
                       {topic.username && (
@@ -1450,31 +2505,31 @@ export function ForumPage() {
 
 
                     <div>
-
                       <span>
                         <MessageSquare
                           size={14}
                         />
 
-                        {topic.replies_count}
+                        {
+                          topic.replies_count
+                        }
                       </span>
 
                       <span>
-                        <Heart
-                          size={14}
-                        />
+                        <Heart size={14} />
 
-                        {topic.likes_count}
+                        {
+                          topic.likes_count
+                        }
                       </span>
 
                       <span>
-                        <Eye
-                          size={14}
-                        />
+                        <Eye size={14} />
 
-                        {topic.views_count}
+                        {
+                          topic.views_count
+                        }
                       </span>
-
                     </div>
 
                   </footer>
