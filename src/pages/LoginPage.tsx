@@ -38,6 +38,10 @@ import {
   LegalDialog,
 } from '../components/LegalDialog'
 
+import {
+  BrandMark,
+} from '../components/BrandMark'
+
 type AuthMode =
   | 'login'
   | 'signup'
@@ -491,13 +495,7 @@ export function LoginPage() {
     <main className="level-auth">
       <section className="level-auth-visual">
         <div className="level-auth-brand">
-          <strong>
-            LEVEL
-          </strong>
-
-          <span>
-            ADV
-          </span>
+          <BrandMark />
         </div>
 
         <div className="level-auth-copy">

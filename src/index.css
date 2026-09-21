@@ -9204,3 +9204,516 @@ label {
     border-radius: 9px;
   }
 }
+
+
+/* ============================================================
+   LEVEL ADV V13 - ADMIN CONTROL + BRANDING
+   ============================================================ */
+
+.level-brand-mark {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.level-brand-mark > img {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 auto;
+  object-fit: cover;
+  border: 1px solid #e0e5e9;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.level-brand-mark > div {
+  min-width: 0;
+}
+
+.level-brand-wordmark {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+}
+
+.level-brand-wordmark strong {
+  color: #171a20;
+  font-size: 16px;
+  letter-spacing: .18em;
+}
+
+.level-brand-wordmark span {
+  color: var(--accent);
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: .14em;
+}
+
+.level-brand-mark small {
+  display: block;
+  margin-top: 3px;
+  color: #89939f;
+  font-size: 6px;
+  line-height: 1.25;
+}
+
+.level-auth-brand .level-brand-mark > img {
+  width: 64px;
+  height: 64px;
+}
+
+.level-auth-brand .level-brand-wordmark strong {
+  font-size: 26px;
+}
+
+.level-auth-brand .level-brand-wordmark span {
+  font-size: 9px;
+}
+
+.level-auth-brand .level-brand-mark small {
+  font-size: 8px;
+}
+
+.admin-heading-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.admin-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 4px 0 14px;
+  padding: 6px;
+  border: 1px solid #e2e7eb;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.admin-tabs button {
+  min-height: 40px;
+  padding: 0 15px;
+  border: 0;
+  border-radius: 8px;
+  color: #69737f;
+  background: transparent;
+  font-weight: 750;
+}
+
+.admin-tabs button.active {
+  color: #fff;
+  background: var(--accent);
+}
+
+.online-stat strong,
+.presence-dot.online {
+  color: #168b60;
+}
+
+.presence-dot {
+  width: 9px;
+  height: 9px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #c8cfd5;
+  box-shadow: 0 0 0 4px rgba(200,207,213,.18);
+}
+
+.presence-dot.online {
+  background: #1b9b6b;
+  box-shadow: 0 0 0 4px rgba(27,155,107,.14);
+}
+
+.admin-user-mini-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-user-mini-list article {
+  display: grid;
+  grid-template-columns: 12px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 0;
+  border-bottom: 1px solid #edf0f2;
+}
+
+.admin-user-mini-list article:last-child {
+  border-bottom: 0;
+}
+
+.admin-user-mini-list article > div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.admin-user-mini-list strong {
+  color: #20242a;
+}
+
+.admin-user-mini-list span,
+.admin-user-mini-list small {
+  color: #7f8995;
+}
+
+.admin-user-toolbar {
+  margin-bottom: 12px;
+}
+
+.admin-user-toolbar input {
+  width: 100%;
+  min-height: 46px;
+  padding: 0 14px;
+  border: 1px solid #dfe4e8;
+  border-radius: 9px;
+  background: #fff;
+}
+
+.admin-user-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.admin-user-card {
+  padding: 15px;
+  border: 1px solid #e1e6ea;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.admin-user-main {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.admin-user-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-user-title > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.admin-user-title strong {
+  color: #171b20;
+  font-size: 13px;
+}
+
+.admin-user-title span {
+  color: #808a96;
+}
+
+.admin-user-badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.status-pill,
+.role-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 8px;
+  border-radius: 100px;
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.status-pill {
+  color: #456;
+  background: #eef2f4;
+}
+
+.status-pill.active {
+  color: #116b4b;
+  background: #e7f6ef;
+}
+
+.status-pill.suspended {
+  color: #8b6210;
+  background: #fff3d7;
+}
+
+.status-pill.banned,
+.status-pill.deleted {
+  color: #9b3131;
+  background: #fdeaea;
+}
+
+.role-pill {
+  color: var(--accent);
+  background:
+    color-mix(
+      in srgb,
+      var(--accent) 8%,
+      white
+    );
+}
+
+.admin-user-details {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 7px 14px;
+  margin: 13px 0;
+  padding: 11px;
+  border-radius: 8px;
+  background: #f8fafb;
+}
+
+.admin-user-details span {
+  color: #88919b;
+  font-size: 8px;
+}
+
+.admin-user-details strong {
+  color: #4b5560;
+}
+
+.admin-user-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.secondary-button.warning {
+  color: #93630d;
+  border-color: #ead8af;
+  background: #fffaf0;
+}
+
+.activity-feed {
+  display: flex;
+  flex-direction: column;
+}
+
+.activity-feed article {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 0;
+  border-bottom: 1px solid #edf0f2;
+}
+
+.activity-feed article:last-child {
+  border-bottom: 0;
+}
+
+.activity-feed svg {
+  color: var(--accent);
+}
+
+.activity-feed article > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.activity-feed strong {
+  color: #252a31;
+}
+
+.activity-feed span,
+.activity-feed small,
+.activity-feed time {
+  color: #7e8994;
+}
+
+.admin-platform-grid,
+.admin-security-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.admin-platform-card {
+  min-height: 210px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 20px;
+  border: 1px solid #e1e6ea;
+  border-radius: 12px;
+  color: inherit;
+  text-decoration: none;
+  background: #fff;
+  transition: .18s ease;
+}
+
+.admin-platform-card:hover {
+  transform: translateY(-2px);
+  border-color:
+    color-mix(
+      in srgb,
+      var(--accent) 35%,
+      #dfe4e8
+    );
+  box-shadow:
+    0 10px 30px
+    rgba(28, 39, 51, .07);
+}
+
+.admin-platform-card svg {
+  color: var(--accent);
+}
+
+.admin-platform-card > span {
+  color: var(--accent);
+  font-size: 7px;
+  font-weight: 850;
+  letter-spacing: .14em;
+}
+
+.admin-platform-card strong {
+  color: #1b1f25;
+  font-size: 16px;
+}
+
+.admin-platform-card p {
+  margin: 0;
+  color: #7c8792;
+  line-height: 1.6;
+}
+
+.admin-security-grid .panel {
+  margin: 0;
+}
+
+.brand-admin-panel {
+  margin-bottom: 12px;
+}
+
+.brand-assets-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.brand-assets-grid article {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 13px;
+  border: 1px solid #e2e7eb;
+  border-radius: 10px;
+  background: #fbfcfc;
+}
+
+.brand-assets-grid article > img {
+  width: 100%;
+  height: 150px;
+  object-fit: contain;
+  border: 1px solid #e5e9ec;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.brand-assets-grid article > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.brand-assets-grid strong {
+  color: #20242a;
+}
+
+.brand-assets-grid span {
+  color: #828c97;
+  line-height: 1.5;
+}
+
+.brand-upload-button {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.brand-upload-button input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.brand-company-row {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    auto;
+  align-items: end;
+  gap: 10px;
+}
+
+.brand-company-row label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.brand-company-row input {
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid #dfe4e8;
+  border-radius: 8px;
+}
+
+.brand-note {
+  display: block;
+  margin-top: 10px;
+  color: #8d96a0;
+}
+
+@media (max-width: 900px) {
+  .admin-heading-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .admin-user-main {
+    flex-direction: column;
+  }
+
+  .admin-user-badges {
+    justify-content: flex-start;
+  }
+
+  .admin-user-details,
+  .admin-platform-grid,
+  .admin-security-grid,
+  .brand-assets-grid,
+  .brand-company-row {
+    grid-template-columns: 1fr;
+  }
+
+  .activity-feed article {
+    grid-template-columns:
+      24px minmax(0, 1fr);
+  }
+
+  .activity-feed time {
+    grid-column: 2;
+  }
+}

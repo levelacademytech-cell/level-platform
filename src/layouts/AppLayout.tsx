@@ -23,8 +23,13 @@ import {
 import {
   NavLink,
   Outlet,
+  useLocation,
   useNavigate,
 } from 'react-router-dom'
+
+import {
+  BrandMark,
+} from '../components/BrandMark'
 
 import {
   useAuth,
@@ -34,11 +39,10 @@ import {
   supabase,
 } from '../lib/supabase'
 
-
 const mainItems = [
   {
     to: '/app',
-    label: 'Início',
+    label: 'InÃ­cio',
     icon: LayoutDashboard,
     end: true,
   },
@@ -69,11 +73,10 @@ const mainItems = [
   },
   {
     to: '/app/forum',
-    label: 'Fórum',
+    label: 'FÃ³rum',
     icon: MessagesSquare,
   },
 ]
-
 
 const presetColors = [
   {
@@ -102,31 +105,39 @@ const presetColors = [
   },
 ]
 
-
 export function AppLayout() {
   const {
     user,
     signOut,
     isAdmin,
-  } = useAuth()
+  } =
+    useAuth()
 
   const navigate =
     useNavigate()
 
+  const location =
+    useLocation()
+
   const [
     mobileOpen,
     setMobileOpen,
-  ] = useState(false)
+  ] =
+    useState(false)
 
   const [
     appearanceOpen,
     setAppearanceOpen,
-  ] = useState(false)
+  ] =
+    useState(false)
 
   const [
     accentColor,
     setAccentColor,
-  ] = useState('#B58A3A')
+  ] =
+    useState(
+      '#B58A3A'
+    )
 
   const displayName =
     user?.user_metadata
@@ -135,13 +146,14 @@ export function AppLayout() {
       ?.display_name ??
     user?.email
       ?.split('@')[0] ??
-    'Usuário'
-
+    'UsuÃ¡rio'
 
   function applyColor(
     color: string
   ) {
-    setAccentColor(color)
+    setAccentColor(
+      color
+    )
 
     document
       .documentElement
@@ -160,29 +172,99 @@ export function AppLayout() {
       )
   }
 
-
   useEffect(() => {
     if (!user) {
       return
     }
 
     void supabase
-      .from('adv_profiles')
-      .select('accent_color')
+      .from(
+        'adv_profiles'
+      )
+      .select(
+        'accent_color'
+      )
       .eq(
         'user_id',
         user.id
       )
       .maybeSingle()
-      .then(({ data }) => {
-        const color =
-          data?.accent_color ??
-          '#B58A3A'
+      .then(
+        ({
+          data,
+        }) => {
+          const color =
+            data
+              ?.accent_color ??
+            '#B58A3A'
 
-        applyColor(color)
-      })
+          applyColor(
+            color
+          )
+        }
+      )
   }, [user?.id])
 
+  useEffect(() => {
+    if (!user) {
+      return
+    }
+
+    const path =
+      location.pathname
+
+    void supabase.rpc(
+      'adv_touch_presence',
+      {
+        p_path: path,
+      }
+    )
+
+    void supabase.rpc(
+      'adv_log_activity',
+      {
+        p_event_type:
+          'page_view',
+
+        p_path:
+          path,
+
+        p_metadata:
+          {},
+      }
+    )
+  }, [
+    user?.id,
+    location.pathname,
+  ])
+
+  useEffect(() => {
+    if (!user) {
+      return
+    }
+
+    const timer =
+      window.setInterval(
+        () => {
+          void supabase.rpc(
+            'adv_touch_presence',
+            {
+              p_path:
+                location.pathname,
+            }
+          )
+        },
+        60000
+      )
+
+    return () =>
+      window.clearInterval(
+        timer
+      )
+  }, [
+    user?.id,
+    location.pathname,
+  ])
 
   async function saveColor(
     color: string
@@ -191,10 +273,14 @@ export function AppLayout() {
       return
     }
 
-    applyColor(color)
+    applyColor(
+      color
+    )
 
     await supabase
-      .from('adv_profiles')
+      .from(
+        'adv_profiles'
+      )
       .upsert({
         user_id:
           user.id,
@@ -203,11 +289,26 @@ export function AppLayout() {
           color,
       })
 
-    setAppearanceOpen(false)
+    setAppearanceOpen(
+      false
+    )
   }
 
-
   async function logout() {
+    await supabase.rpc(
+      'adv_log_activity',
+      {
+        p_event_type:
+          'logout',
+
+        p_path:
+          location.pathname,
+
+        p_metadata:
+          {},
+      }
+    )
+
     await signOut()
 
     navigate(
@@ -218,10 +319,8 @@ export function AppLayout() {
     )
   }
 
-
   return (
     <div className="adv-shell">
-
       <aside
         className={
           mobileOpen
@@ -229,53 +328,39 @@ export function AppLayout() {
             : 'adv-sidebar'
         }
       >
-
-        <div className="adv-brand">
-          <strong>
-            LEVEL
-          </strong>
-
-          <span>
-            ADV
-          </span>
-        </div>
-
+        <BrandMark />
 
         <button
           type="button"
           className="mobile-close"
           onClick={() =>
-            setMobileOpen(false)
+            setMobileOpen(
+              false
+            )
           }
         >
           <X size={20} />
         </button>
 
-
         <div className="office-card">
-
           <span>
             AMBIENTE
           </span>
 
           <strong>
-            LEVEL Jurídico
+            LEVEL JurÃ­dico
           </strong>
 
           <small>
-            Escritório principal
+            EscritÃ³rio principal
           </small>
-
         </div>
-
 
         <div className="nav-label">
-          NAVEGAÇÃO
+          NAVEGAÃ‡ÃƒO
         </div>
 
-
         <nav>
-
           {mainItems.map(
             (item) => {
               const Icon =
@@ -287,7 +372,9 @@ export function AppLayout() {
                   to={item.to}
                   end={item.end}
                   onClick={() =>
-                    setMobileOpen(false)
+                    setMobileOpen(
+                      false
+                    )
                   }
                   className={({
                     isActive,
@@ -297,7 +384,9 @@ export function AppLayout() {
                       : 'nav-item'
                   }
                 >
-                  <Icon size={18} />
+                  <Icon
+                    size={18}
+                  />
 
                   <span>
                     {item.label}
@@ -307,17 +396,19 @@ export function AppLayout() {
             }
           )}
 
-
           {isAdmin && (
             <>
               <div className="nav-label second">
-                ADMINISTRAÇÃO
+                ADMINISTRAÃ‡ÃƒO
               </div>
 
               <NavLink
                 to="/app/admin"
+                end
                 onClick={() =>
-                  setMobileOpen(false)
+                  setMobileOpen(
+                    false
+                  )
                 }
                 className={({
                   isActive,
@@ -335,31 +426,35 @@ export function AppLayout() {
                   Painel administrador
                 </span>
               </NavLink>
+
               <NavLink
                 to="/app/admin/banners"
                 onClick={() =>
-                  setMobileOpen(false)
+                  setMobileOpen(
+                    false
+                  )
                 }
-                className={({ isActive }) =>
+                className={({
+                  isActive,
+                }) =>
                   isActive
                     ? 'nav-item active'
                     : 'nav-item'
                 }
               >
-                <ImagePlus size={18} />
+                <ImagePlus
+                  size={18}
+                />
 
                 <span>
-                  Banners e anúncios
+                  Banners e marca
                 </span>
               </NavLink>
             </>
           )}
-
         </nav>
 
-
         <div className="sidebar-user">
-
           <div className="user-avatar">
             {displayName
               .charAt(0)
@@ -377,35 +472,36 @@ export function AppLayout() {
                 : 'Advogado'}
             </span>
           </div>
-
         </div>
-
 
         <button
           className="logout-button"
-          onClick={logout}
+          onClick={
+            logout
+          }
         >
-          <LogOut size={17} />
+          <LogOut
+            size={17}
+          />
 
           Sair da LEVEL
         </button>
-
       </aside>
 
-
       <section className="adv-workspace">
-
         <header className="adv-topbar">
-
           <div className="topbar-left">
-
             <button
               className="mobile-menu"
               onClick={() =>
-                setMobileOpen(true)
+                setMobileOpen(
+                  true
+                )
               }
             >
-              <Menu size={20} />
+              <Menu
+                size={20}
+              />
             </button>
 
             <div>
@@ -414,29 +510,29 @@ export function AppLayout() {
               </span>
 
               <strong>
-                Ambiente jurídico
+                Ambiente jurÃ­dico
               </strong>
             </div>
-
           </div>
 
-
           <div className="topbar-actions">
-
             <div className="appearance-control">
-
               <button
                 type="button"
                 className="appearance-button"
                 onClick={() =>
                   setAppearanceOpen(
-                    (current) =>
+                    (
+                      current
+                    ) =>
                       !current
                   )
                 }
-                title="Personalizar aparência"
+                title="Personalizar aparÃªncia"
               >
-                <Palette size={18} />
+                <Palette
+                  size={18}
+                />
 
                 <span
                   className="accent-preview"
@@ -447,14 +543,12 @@ export function AppLayout() {
                 />
               </button>
 
-
               {appearanceOpen && (
                 <div className="appearance-popover">
-
                   <div className="appearance-title">
                     <div>
                       <span>
-                        APARÊNCIA
+                        APARÃŠNCIA
                       </span>
 
                       <strong>
@@ -467,18 +561,17 @@ export function AppLayout() {
                     />
                   </div>
 
-
                   <p>
-                    Escolha a cor dos botões,
-                    ícones e detalhes da sua
+                    Escolha a cor dos botÃµes,
+                    Ã­cones e detalhes da sua
                     plataforma.
                   </p>
 
-
                   <div className="preset-colors">
-
                     {presetColors.map(
-                      (color) => (
+                      (
+                        color
+                      ) => (
                         <button
                           key={
                             color.value
@@ -516,12 +609,9 @@ export function AppLayout() {
                         </button>
                       )
                     )}
-
                   </div>
 
-
                   <label className="custom-color">
-
                     Cor personalizada
 
                     <div>
@@ -569,9 +659,7 @@ export function AppLayout() {
                         }}
                       />
                     </div>
-
                   </label>
-
 
                   <button
                     type="button"
@@ -590,28 +678,20 @@ export function AppLayout() {
                   >
                     Salvar minha cor
                   </button>
-
                 </div>
               )}
-
             </div>
-
 
             <div className="topbar-user">
               {user?.email}
             </div>
-
           </div>
-
         </header>
-
 
         <main className="adv-content">
           <Outlet />
         </main>
-
       </section>
-
     </div>
   )
 }

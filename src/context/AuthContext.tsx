@@ -12,7 +12,9 @@ import type {
   User,
 } from '@supabase/supabase-js'
 
-import { supabase } from '../lib/supabase'
+import {
+  supabase,
+} from '../lib/supabase'
 
 type AuthContextValue = {
   session: Session | null
@@ -20,6 +22,7 @@ type AuthContextValue = {
   loading: boolean
   roles: string[]
   isAdmin: boolean
+  accountStatus: string
   signIn: (
     email: string,
     password: string
@@ -32,91 +35,252 @@ const AuthContext =
     null
   )
 
+const blockedStatuses = [
+  'suspended',
+  'banned',
+  'deleted',
+]
+
 export function AuthProvider({
   children,
 }: {
   children: ReactNode
 }) {
-  const [session, setSession] =
-    useState<Session | null>(null)
+  const [
+    session,
+    setSession,
+  ] =
+    useState<Session | null>(
+      null
+    )
 
-  const [loading, setLoading] =
+  const [
+    loading,
+    setLoading,
+  ] =
     useState(true)
 
-  const [roles, setRoles] =
+  const [
+    roles,
+    setRoles,
+  ] =
     useState<string[]>([])
 
-  async function loadRoles() {
-    const { data, error } =
-      await supabase.rpc(
-        'get_my_role_keys'
-      )
+  const [
+    accountStatus,
+    setAccountStatus,
+  ] =
+    useState('active')
 
-    if (error) {
+  async function loadAccess(
+    userId: string
+  ) {
+    const [
+      roleResult,
+      profileResult,
+    ] =
+      await Promise.all([
+        supabase.rpc(
+          'get_my_role_keys'
+        ),
+
+        supabase
+          .from('profiles')
+          .select(
+            'account_status'
+          )
+          .eq(
+            'id',
+            userId
+          )
+          .maybeSingle(),
+      ])
+
+    const nextRoles =
+      roleResult.error
+        ? []
+        : Array.isArray(
+            roleResult.data
+          )
+          ? roleResult.data
+          : []
+
+    const nextStatus =
+      profileResult.data
+        ?.account_status ??
+      'active'
+
+    setRoles(nextRoles)
+    setAccountStatus(
+      nextStatus
+    )
+
+    if (
+      blockedStatuses.includes(
+        nextStatus
+      )
+    ) {
+      await supabase.auth
+        .signOut()
+
       setRoles([])
-      return
+      setSession(null)
+
+      return false
     }
 
-    setRoles(
-      Array.isArray(data)
-        ? data
-        : []
-    )
+    return true
   }
 
   useEffect(() => {
     void supabase.auth
       .getSession()
-      .then(async ({ data }) => {
-        setSession(data.session)
+      .then(
+        async ({
+          data,
+        }) => {
+          const next =
+            data.session
 
-        if (data.session) {
-          await loadRoles()
-        }
+          setSession(next)
 
-        setLoading(false)
-      })
-
-    const {
-      data: subscription,
-    } =
-      supabase.auth.onAuthStateChange(
-        async (_event, nextSession) => {
-          setSession(nextSession)
-
-          if (nextSession) {
-            await loadRoles()
-          } else {
-            setRoles([])
+          if (next) {
+            await loadAccess(
+              next.user.id
+            )
           }
 
           setLoading(false)
         }
       )
 
+    const {
+      data:
+        subscription,
+    } =
+      supabase.auth
+        .onAuthStateChange(
+          async (
+            _event,
+            nextSession
+          ) => {
+            setSession(
+              nextSession
+            )
+
+            if (
+              nextSession
+            ) {
+              await loadAccess(
+                nextSession
+                  .user.id
+              )
+            } else {
+              setRoles([])
+              setAccountStatus(
+                'active'
+              )
+            }
+
+            setLoading(false)
+          }
+        )
+
     return () => {
-      subscription.subscription.unsubscribe()
+      subscription
+        .subscription
+        .unsubscribe()
     }
   }, [])
+
+  useEffect(() => {
+    if (!session?.user.id) {
+      return
+    }
+
+    const timer =
+      window.setInterval(
+        () => {
+          void supabase
+            .from('profiles')
+            .select(
+              'account_status'
+            )
+            .eq(
+              'id',
+              session.user.id
+            )
+            .maybeSingle()
+            .then(
+              async ({
+                data,
+              }) => {
+                const status =
+                  data
+                    ?.account_status ??
+                  'active'
+
+                setAccountStatus(
+                  status
+                )
+
+                if (
+                  blockedStatuses
+                    .includes(
+                      status
+                    )
+                ) {
+                  await supabase
+                    .auth
+                    .signOut()
+                }
+              }
+            )
+        },
+        60000
+      )
+
+    return () =>
+      window.clearInterval(
+        timer
+      )
+  }, [session?.user.id])
 
   async function signIn(
     email: string,
     password: string
   ) {
-    const { error } =
+    const {
+      data,
+      error,
+    } =
       await supabase.auth
         .signInWithPassword({
           email,
           password,
         })
 
-    return error
-      ? error.message
-      : null
+    if (error) {
+      return error.message
+    }
+
+    if (data.user) {
+      const allowed =
+        await loadAccess(
+          data.user.id
+        )
+
+      if (!allowed) {
+        return 'Seu acesso estÃ¡ bloqueado. Entre em contato com o administrador da LEVEL ADV.'
+      }
+    }
+
+    return null
   }
 
   async function signOut() {
-    await supabase.auth.signOut()
+    await supabase.auth
+      .signOut()
   }
 
   const value =
@@ -132,9 +296,15 @@ export function AuthProvider({
 
         roles,
 
+        accountStatus,
+
         isAdmin:
-          roles.includes('director') ||
-          roles.includes('admin') ||
+          roles.includes(
+            'director'
+          ) ||
+          roles.includes(
+            'admin'
+          ) ||
           roles.includes(
             'super_admin'
           ),
@@ -146,6 +316,7 @@ export function AuthProvider({
         session,
         loading,
         roles,
+        accountStatus,
       ]
     )
 
@@ -160,7 +331,9 @@ export function AuthProvider({
 
 export function useAuth() {
   const context =
-    useContext(AuthContext)
+    useContext(
+      AuthContext
+    )
 
   if (!context) {
     throw new Error(

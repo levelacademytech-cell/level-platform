@@ -21,6 +21,10 @@ import {
 } from '../context/AuthContext'
 
 import {
+  useBranding,
+} from '../context/BrandingContext'
+
+import {
   supabase,
 } from '../lib/supabase'
 
@@ -34,6 +38,11 @@ type BannerRow = {
   is_active: boolean
   created_at: string
 }
+
+type BrandKind =
+  | 'logo'
+  | 'favicon'
+  | 'share'
 
 function safeName(
   value: string
@@ -50,6 +59,47 @@ function safeName(
     )
 }
 
+function extensionFor(
+  file: File
+) {
+  const current =
+    file.name
+      .split('.')
+      .pop()
+      ?.toLowerCase()
+
+  if (
+    current &&
+    current.length <= 5
+  ) {
+    return current
+  }
+
+  if (
+    file.type ===
+    'image/webp'
+  ) {
+    return 'webp'
+  }
+
+  if (
+    file.type ===
+    'image/jpeg'
+  ) {
+    return 'jpg'
+  }
+
+  if (
+    file.type.includes(
+      'icon'
+    )
+  ) {
+    return 'ico'
+  }
+
+  return 'png'
+}
+
 export function BannerAdminPage() {
   const {
     user,
@@ -57,11 +107,22 @@ export function BannerAdminPage() {
   } =
     useAuth()
 
+  const {
+    logoUrl,
+    faviconUrl,
+    shareImageUrl,
+    companyName,
+    refreshBranding,
+  } =
+    useBranding()
+
   const [
     banners,
     setBanners,
   ] =
-    useState<BannerRow[]>([])
+    useState<BannerRow[]>(
+      []
+    )
 
   const [
     file,
@@ -90,6 +151,14 @@ export function BannerAdminPage() {
     useState(10)
 
   const [
+    company,
+    setCompany,
+  ] =
+    useState(
+      companyName
+    )
+
+  const [
     message,
     setMessage,
   ] =
@@ -101,6 +170,12 @@ export function BannerAdminPage() {
   ] =
     useState(false)
 
+  useEffect(() => {
+    setCompany(
+      companyName
+    )
+  }, [companyName])
+
   async function load() {
     if (!isAdmin) {
       return
@@ -111,12 +186,15 @@ export function BannerAdminPage() {
       error,
     } =
       await supabase
-        .from('adv_banners')
+        .from(
+          'adv_banners'
+        )
         .select('*')
         .order(
           'sort_order',
           {
-            ascending: true,
+            ascending:
+              true,
           }
         )
 
@@ -124,11 +202,14 @@ export function BannerAdminPage() {
       setMessage(
         error.message
       )
-
       return
     }
 
-    setBanners((data ?? []) as BannerRow[])
+    setBanners(
+      (
+        data ?? []
+      ) as BannerRow[]
+    )
   }
 
   useEffect(() => {
@@ -140,7 +221,8 @@ export function BannerAdminPage() {
       ChangeEvent<HTMLInputElement>
   ) {
     const next =
-      event.target.files?.[0] ??
+      event.target
+        .files?.[0] ??
       null
 
     if (!next) {
@@ -150,13 +232,17 @@ export function BannerAdminPage() {
 
     if (
       !next.type
-        .startsWith('image/')
+        .startsWith(
+          'image/'
+        )
     ) {
       setMessage(
-        'Selecione uma imagem PNG, JPG ou WEBP.'
+        'Selecione uma imagem vÃ¡lida.'
       )
 
-      event.target.value = ''
+      event.target.value =
+        ''
+
       return
     }
 
@@ -168,12 +254,150 @@ export function BannerAdminPage() {
         'A imagem deve ter no mÃ¡ximo 8 MB.'
       )
 
-      event.target.value = ''
+      event.target.value =
+        ''
+
       return
     }
 
     setMessage('')
     setFile(next)
+  }
+
+  async function uploadBrand(
+    kind: BrandKind,
+    selected: File
+  ) {
+    if (
+      !user ||
+      !isAdmin
+    ) {
+      return
+    }
+
+    setBusy(true)
+    setMessage(
+      'Atualizando identidade visual...'
+    )
+
+    const ext =
+      extensionFor(
+        selected
+      )
+
+    const storagePath =
+      `branding/${kind}-${Date.now()}.${ext}`
+
+    const {
+      error:
+        uploadError,
+    } =
+      await supabase
+        .storage
+        .from(
+          'level-adv-branding'
+        )
+        .upload(
+          storagePath,
+          selected,
+          {
+            contentType:
+              selected.type,
+            upsert: false,
+          }
+        )
+
+    if (
+      uploadError
+    ) {
+      setBusy(false)
+      setMessage(
+        uploadError.message
+      )
+      return
+    }
+
+    const {
+      data:
+        publicUrl,
+    } =
+      supabase.storage
+        .from(
+          'level-adv-branding'
+        )
+        .getPublicUrl(
+          storagePath
+        )
+
+    const key =
+      kind === 'logo'
+        ? 'brand_logo_url'
+        : kind ===
+            'favicon'
+          ? 'brand_favicon_url'
+          : 'brand_share_image_url'
+
+    const {
+      error,
+    } =
+      await supabase
+        .from(
+          'adv_settings'
+        )
+        .upsert({
+          key,
+          value:
+            publicUrl
+              .publicUrl,
+        })
+
+    setBusy(false)
+
+    if (error) {
+      setMessage(
+        error.message
+      )
+      return
+    }
+
+    await refreshBranding()
+
+    setMessage(
+      'Identidade visual atualizada.'
+    )
+  }
+
+  async function saveCompany() {
+    const value =
+      company.trim() ||
+      'Ludo Digital MKT'
+
+    const {
+      error,
+    } =
+      await supabase
+        .from(
+          'adv_settings'
+        )
+        .upsert({
+          key:
+            'brand_company_name',
+
+          value,
+        })
+
+    if (error) {
+      setMessage(
+        error.message
+      )
+      return
+    }
+
+    await refreshBranding()
+
+    setMessage(
+      'Nome da empresa atualizado.'
+    )
   }
 
   async function createBanner() {
@@ -191,7 +415,6 @@ export function BannerAdminPage() {
       setMessage(
         'Informe o tÃ­tulo e selecione a imagem.'
       )
-
       return
     }
 
@@ -204,9 +427,11 @@ export function BannerAdminPage() {
       `${user.id}/${Date.now()}-${safeName(file.name)}`
 
     const {
-      error: uploadError,
+      error:
+        uploadError,
     } =
-      await supabase.storage
+      await supabase
+        .storage
         .from(
           'level-adv-banners'
         )
@@ -216,11 +441,15 @@ export function BannerAdminPage() {
           {
             contentType:
               file.type,
-            upsert: false,
+
+            upsert:
+              false,
           }
         )
 
-    if (uploadError) {
+    if (
+      uploadError
+    ) {
       setBusy(false)
       setMessage(
         uploadError.message
@@ -229,7 +458,8 @@ export function BannerAdminPage() {
     }
 
     const {
-      data: publicUrl,
+      data:
+        publicUrl,
     } =
       supabase.storage
         .from(
@@ -243,19 +473,23 @@ export function BannerAdminPage() {
       error,
     } =
       await supabase
-        .from('adv_banners')
+        .from(
+          'adv_banners'
+        )
         .insert({
           title:
             title.trim(),
 
           image_url:
-            publicUrl.publicUrl,
+            publicUrl
+              .publicUrl,
 
           storage_path:
             storagePath,
 
           link_url:
-            linkUrl.trim() ||
+            linkUrl
+              .trim() ||
             null,
 
           sort_order:
@@ -269,7 +503,8 @@ export function BannerAdminPage() {
         })
 
     if (error) {
-      await supabase.storage
+      await supabase
+        .storage
         .from(
           'level-adv-banners'
         )
@@ -278,6 +513,7 @@ export function BannerAdminPage() {
         ])
 
       setBusy(false)
+
       setMessage(
         error.message
       )
@@ -289,6 +525,7 @@ export function BannerAdminPage() {
     setSortOrder(10)
     setFile(null)
     setBusy(false)
+
     setMessage(
       'Banner publicado no carrossel.'
     )
@@ -302,10 +539,15 @@ export function BannerAdminPage() {
       Partial<BannerRow>
   ) {
     setBanners(
-      (current) =>
+      (
+        current
+      ) =>
         current.map(
-          (item) =>
-            item.id === id
+          (
+            item
+          ) =>
+            item.id ===
+            id
               ? {
                   ...item,
                   ...patch,
@@ -324,23 +566,29 @@ export function BannerAdminPage() {
       error,
     } =
       await supabase
-        .from('adv_banners')
+        .from(
+          'adv_banners'
+        )
         .update({
           title:
-            banner.title.trim(),
+            banner.title
+              .trim(),
 
           link_url:
-            banner.link_url
+            banner
+              .link_url
               ?.trim() ||
             null,
 
           sort_order:
             Number(
-              banner.sort_order
+              banner
+                .sort_order
             ) || 0,
 
           is_active:
-            banner.is_active,
+            banner
+              .is_active,
         })
         .eq(
           'id',
@@ -370,10 +618,13 @@ export function BannerAdminPage() {
       error,
     } =
       await supabase
-        .from('adv_banners')
+        .from(
+          'adv_banners'
+        )
         .update({
           is_active:
-            !banner.is_active,
+            !banner
+              .is_active,
         })
         .eq(
           'id',
@@ -411,18 +662,23 @@ export function BannerAdminPage() {
         error:
           storageError,
       } =
-        await supabase.storage
+        await supabase
+          .storage
           .from(
             'level-adv-banners'
           )
           .remove([
-            banner.storage_path,
+            banner
+              .storage_path,
           ])
 
-      if (storageError) {
+      if (
+        storageError
+      ) {
         setBusy(false)
         setMessage(
-          storageError.message
+          storageError
+            .message
         )
         return
       }
@@ -432,7 +688,9 @@ export function BannerAdminPage() {
       error,
     } =
       await supabase
-        .from('adv_banners')
+        .from(
+          'adv_banners'
+        )
         .delete()
         .eq(
           'id',
@@ -473,14 +731,13 @@ export function BannerAdminPage() {
         </span>
 
         <h1>
-          Banners e anÃºncios
+          Banners e marca
         </h1>
 
         <p>
-          Adicione imagens ao carrossel
-          da pÃ¡gina inicial, defina
-          ordem, destino do clique e
-          ative ou pause cada banner.
+          Controle os anÃºncios e
+          a identidade visual da
+          LEVEL ADV.
         </p>
       </div>
 
@@ -489,6 +746,240 @@ export function BannerAdminPage() {
           {message}
         </div>
       )}
+
+      <section className="panel brand-admin-panel">
+        <div className="panel-heading">
+          <div>
+            <span className="eyebrow">
+              IDENTIDADE VISUAL
+            </span>
+
+            <h2>
+              Logo, favicon e compartilhamento
+            </h2>
+
+            <p>
+              A logo Ã© usada dentro
+              da plataforma. O favicon
+              aparece na aba do
+              navegador. A imagem de
+              compartilhamento Ã© usada
+              pela interface e como
+              referÃªncia para links.
+            </p>
+          </div>
+
+          <ImagePlus
+            size={24}
+          />
+        </div>
+
+        <div className="brand-assets-grid">
+          <article>
+            <img
+              src={logoUrl}
+              alt="Logo atual"
+            />
+
+            <div>
+              <strong>
+                Logo principal
+              </strong>
+
+              <span>
+                Recomendado:
+                PNG quadrado e fundo
+                transparente ou claro.
+              </span>
+            </div>
+
+            <label className="secondary-button brand-upload-button">
+              <UploadCloud
+                size={14}
+              />
+
+              Trocar logo
+
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                onChange={(
+                  event
+                ) => {
+                  const selected =
+                    event
+                      .target
+                      .files?.[0]
+
+                  if (
+                    selected
+                  ) {
+                    void uploadBrand(
+                      'logo',
+                      selected
+                    )
+                  }
+
+                  event
+                    .currentTarget
+                    .value =
+                    ''
+                }}
+              />
+            </label>
+          </article>
+
+          <article>
+            <img
+              src={faviconUrl}
+              alt="Favicon atual"
+            />
+
+            <div>
+              <strong>
+                Favicon
+              </strong>
+
+              <span>
+                Ãcone pequeno da aba
+                do navegador.
+              </span>
+            </div>
+
+            <label className="secondary-button brand-upload-button">
+              <UploadCloud
+                size={14}
+              />
+
+              Trocar favicon
+
+              <input
+                type="file"
+                accept="image/png,image/x-icon,image/vnd.microsoft.icon"
+                onChange={(
+                  event
+                ) => {
+                  const selected =
+                    event
+                      .target
+                      .files?.[0]
+
+                  if (
+                    selected
+                  ) {
+                    void uploadBrand(
+                      'favicon',
+                      selected
+                    )
+                  }
+
+                  event
+                    .currentTarget
+                    .value =
+                    ''
+                }}
+              />
+            </label>
+          </article>
+
+          <article>
+            <img
+              src={shareImageUrl}
+              alt="Imagem de compartilhamento atual"
+            />
+
+            <div>
+              <strong>
+                Compartilhamento
+              </strong>
+
+              <span>
+                Recomendado:
+                1200 Ã— 630.
+                Alguns aplicativos
+                mantÃªm cache da
+                imagem anterior.
+              </span>
+            </div>
+
+            <label className="secondary-button brand-upload-button">
+              <UploadCloud
+                size={14}
+              />
+
+              Trocar imagem
+
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                onChange={(
+                  event
+                ) => {
+                  const selected =
+                    event
+                      .target
+                      .files?.[0]
+
+                  if (
+                    selected
+                  ) {
+                    void uploadBrand(
+                      'share',
+                      selected
+                    )
+                  }
+
+                  event
+                    .currentTarget
+                    .value =
+                    ''
+                }}
+              />
+            </label>
+          </article>
+        </div>
+
+        <div className="brand-company-row">
+          <label>
+            Empresa responsÃ¡vel
+
+            <input
+              value={
+                company
+              }
+              onChange={(
+                event
+              ) =>
+                setCompany(
+                  event
+                    .target
+                    .value
+                )
+              }
+            />
+          </label>
+
+          <button
+            type="button"
+            className="primary-button"
+            onClick={() =>
+              void saveCompany()
+            }
+          >
+            <Save
+              size={14}
+            />
+
+            Salvar empresa
+          </button>
+        </div>
+
+        <small className="brand-note">
+          O Ã­cone instalado como aplicativo
+          usa tambÃ©m os arquivos PWA
+          empacotados nesta versÃ£o da LEVEL.
+        </small>
+      </section>
 
       <section className="panel banner-create-panel">
         <div className="panel-heading">
@@ -502,13 +993,17 @@ export function BannerAdminPage() {
             </h2>
 
             <p>
-              Recomendado: 1600 Ã— 900
-              ou 1920 Ã— 1080, formato
-              16:9, PNG/JPG/WEBP.
+              Recomendado:
+              1600 Ã— 900 ou
+              1920 Ã— 1080,
+              formato 16:9,
+              PNG/JPG/WEBP.
             </p>
           </div>
 
-          <ImagePlus size={24} />
+          <ImagePlus
+            size={24}
+          />
         </div>
 
         <div className="banner-admin-form">
@@ -517,9 +1012,13 @@ export function BannerAdminPage() {
 
             <input
               value={title}
-              onChange={(event) =>
+              onChange={(
+                event
+              ) =>
                 setTitle(
-                  event.target.value
+                  event
+                    .target
+                    .value
                 )
               }
               placeholder="Ex.: Calculadoras jurÃ­dicas"
@@ -530,10 +1029,16 @@ export function BannerAdminPage() {
             Link ao clicar
 
             <input
-              value={linkUrl}
-              onChange={(event) =>
+              value={
+                linkUrl
+              }
+              onChange={(
+                event
+              ) =>
                 setLinkUrl(
-                  event.target.value
+                  event
+                    .target
+                    .value
                 )
               }
               placeholder="/app/calculadoras ou https://..."
@@ -545,11 +1050,17 @@ export function BannerAdminPage() {
 
             <input
               type="number"
-              value={sortOrder}
-              onChange={(event) =>
+              value={
+                sortOrder
+              }
+              onChange={(
+                event
+              ) =>
                 setSortOrder(
                   Number(
-                    event.target.value
+                    event
+                      .target
+                      .value
                   )
                 )
               }
@@ -574,7 +1085,9 @@ export function BannerAdminPage() {
             <input
               type="file"
               accept="image/png,image/jpeg,image/webp"
-              onChange={onFile}
+              onChange={
+                onFile
+              }
             />
           </label>
         </div>
@@ -585,7 +1098,9 @@ export function BannerAdminPage() {
           onClick={() =>
             void createBanner()
           }
-          disabled={busy}
+          disabled={
+            busy
+          }
         >
           <UploadCloud
             size={15}
@@ -599,9 +1114,13 @@ export function BannerAdminPage() {
 
       <section className="banner-admin-list">
         {banners.map(
-          (banner) => (
+          (
+            banner
+          ) => (
             <article
-              key={banner.id}
+              key={
+                banner.id
+              }
               className="banner-admin-card"
             >
               <img
@@ -621,7 +1140,9 @@ export function BannerAdminPage() {
                     value={
                       banner.title
                     }
-                    onChange={(event) =>
+                    onChange={(
+                      event
+                    ) =>
                       updateLocal(
                         banner.id,
                         {
@@ -643,7 +1164,9 @@ export function BannerAdminPage() {
                       banner.link_url ??
                       ''
                     }
-                    onChange={(event) =>
+                    onChange={(
+                      event
+                    ) =>
                       updateLocal(
                         banner.id,
                         {
@@ -665,7 +1188,9 @@ export function BannerAdminPage() {
                     value={
                       banner.sort_order
                     }
-                    onChange={(event) =>
+                    onChange={(
+                      event
+                    ) =>
                       updateLocal(
                         banner.id,
                         {
@@ -714,7 +1239,9 @@ export function BannerAdminPage() {
                         banner
                       )
                     }
-                    disabled={busy}
+                    disabled={
+                      busy
+                    }
                   >
                     <Save
                       size={14}
@@ -731,7 +1258,9 @@ export function BannerAdminPage() {
                         banner
                       )
                     }
-                    disabled={busy}
+                    disabled={
+                      busy
+                    }
                   >
                     <Trash2
                       size={14}

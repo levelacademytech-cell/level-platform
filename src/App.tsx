@@ -11,6 +11,10 @@ import {
 } from './context/AuthContext'
 
 import {
+  BrandingProvider,
+} from './context/BrandingContext'
+
+import {
   LegalGate,
 } from './components/LegalGate'
 
@@ -21,6 +25,7 @@ import {
 import {
   AdminPage,
 } from './pages/AdminPage'
+
 import {
   BannerAdminPage,
 } from './pages/BannerAdminPage'
@@ -77,7 +82,8 @@ function ProtectedLayout() {
   const {
     session,
     loading,
-  } = useAuth()
+  } =
+    useAuth()
 
   if (loading) {
     return (
@@ -240,6 +246,7 @@ function AppRoutes() {
             <AdminPage />
           }
         />
+
         <Route
           path="admin/banners"
           element={
@@ -264,9 +271,11 @@ function AppRoutes() {
 export default function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <AppRoutes />
-      </AuthProvider>
+      <BrandingProvider>
+        <AuthProvider>
+          <AppRoutes />
+        </AuthProvider>
+      </BrandingProvider>
     </BrowserRouter>
   )
 }
