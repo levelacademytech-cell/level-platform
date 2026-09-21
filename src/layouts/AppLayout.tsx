@@ -2,17 +2,20 @@ import {
   Bot,
   BriefcaseBusiness,
   Calculator,
+  Check,
   FileText,
   LayoutDashboard,
   LogOut,
   Menu,
   MessageCircle,
   MessagesSquare,
+  Palette,
   ShieldCheck,
   X,
 } from 'lucide-react'
 
 import {
+  useEffect,
   useState,
 } from 'react'
 
@@ -26,10 +29,15 @@ import {
   useAuth,
 } from '../context/AuthContext'
 
+import {
+  supabase,
+} from '../lib/supabase'
+
+
 const mainItems = [
   {
     to: '/app',
-    label: 'Inicio',
+    label: 'Início',
     icon: LayoutDashboard,
     end: true,
   },
@@ -61,10 +69,39 @@ const mainItems = [
   },
   {
     to: '/app/forum',
-    label: 'Forum',
+    label: 'Fórum',
     icon: MessagesSquare,
   },
 ]
+
+
+const presetColors = [
+  {
+    name: 'Dourado',
+    value: '#B58A3A',
+  },
+  {
+    name: 'Azul',
+    value: '#315FCE',
+  },
+  {
+    name: 'Vinho',
+    value: '#8D3048',
+  },
+  {
+    name: 'Verde',
+    value: '#28745B',
+  },
+  {
+    name: 'Roxo',
+    value: '#7252B7',
+  },
+  {
+    name: 'Grafite',
+    value: '#353C48',
+  },
+]
+
 
 export function AppLayout() {
   const {
@@ -76,8 +113,20 @@ export function AppLayout() {
   const navigate =
     useNavigate()
 
-  const [open, setOpen] =
-    useState(false)
+  const [
+    mobileOpen,
+    setMobileOpen,
+  ] = useState(false)
+
+  const [
+    appearanceOpen,
+    setAppearanceOpen,
+  ] = useState(false)
+
+  const [
+    accentColor,
+    setAccentColor,
+  ] = useState('#B58A3A')
 
   const displayName =
     user?.user_metadata
@@ -86,7 +135,77 @@ export function AppLayout() {
       ?.display_name ??
     user?.email
       ?.split('@')[0] ??
-    'Usuario'
+    'Usuário'
+
+
+  function applyColor(
+    color: string
+  ) {
+    setAccentColor(color)
+
+    document
+      .documentElement
+      .style
+      .setProperty(
+        '--accent',
+        color
+      )
+
+    document
+      .documentElement
+      .style
+      .setProperty(
+        '--gold',
+        color
+      )
+  }
+
+
+  useEffect(() => {
+    if (!user) {
+      return
+    }
+
+    void supabase
+      .from('adv_profiles')
+      .select('accent_color')
+      .eq(
+        'user_id',
+        user.id
+      )
+      .maybeSingle()
+      .then(({ data }) => {
+        const color =
+          data?.accent_color ??
+          '#B58A3A'
+
+        applyColor(color)
+      })
+  }, [user?.id])
+
+
+  async function saveColor(
+    color: string
+  ) {
+    if (!user) {
+      return
+    }
+
+    applyColor(color)
+
+    await supabase
+      .from('adv_profiles')
+      .upsert({
+        user_id:
+          user.id,
+
+        accent_color:
+          color,
+      })
+
+    setAppearanceOpen(false)
+  }
+
 
   async function logout() {
     await signOut()
@@ -99,45 +218,64 @@ export function AppLayout() {
     )
   }
 
+
   return (
     <div className="adv-shell">
+
       <aside
         className={
-          open
+          mobileOpen
             ? 'adv-sidebar open'
             : 'adv-sidebar'
         }
       >
+
         <div className="adv-brand">
-          <strong>LEVEL</strong>
-          <span>ADV</span>
+          <strong>
+            LEVEL
+          </strong>
+
+          <span>
+            ADV
+          </span>
         </div>
+
 
         <button
           type="button"
           className="mobile-close"
           onClick={() =>
-            setOpen(false)
+            setMobileOpen(false)
           }
         >
           <X size={20} />
         </button>
 
+
         <div className="office-card">
-          <span>AMBIENTE</span>
+
+          <span>
+            AMBIENTE
+          </span>
+
           <strong>
             LEVEL Jurídico
           </strong>
+
           <small>
             Escritório principal
           </small>
+
         </div>
+
 
         <div className="nav-label">
-          NAVEGACAO
+          NAVEGAÇÃO
         </div>
 
+
         <nav>
+
           {mainItems.map(
             (item) => {
               const Icon =
@@ -149,7 +287,7 @@ export function AppLayout() {
                   to={item.to}
                   end={item.end}
                   onClick={() =>
-                    setOpen(false)
+                    setMobileOpen(false)
                   }
                   className={({
                     isActive,
@@ -175,16 +313,17 @@ export function AppLayout() {
             }
           )}
 
+
           {isAdmin && (
             <>
               <div className="nav-label second">
-                ADMINISTRACAO
+                ADMINISTRAÇÃO
               </div>
 
               <NavLink
                 to="/app/admin"
                 onClick={() =>
-                  setOpen(false)
+                  setMobileOpen(false)
                 }
                 className={({
                   isActive,
@@ -204,9 +343,12 @@ export function AppLayout() {
               </NavLink>
             </>
           )}
+
         </nav>
 
+
         <div className="sidebar-user">
+
           <div className="user-avatar">
             {displayName
               .charAt(0)
@@ -224,47 +366,241 @@ export function AppLayout() {
                 : 'Advogado'}
             </span>
           </div>
+
         </div>
+
 
         <button
           className="logout-button"
           onClick={logout}
         >
           <LogOut size={17} />
+
           Sair da LEVEL
         </button>
+
       </aside>
 
+
       <section className="adv-workspace">
+
         <header className="adv-topbar">
-          <button
-            className="mobile-menu"
-            onClick={() =>
-              setOpen(true)
-            }
-          >
-            <Menu size={20} />
-          </button>
 
-          <div>
-            <span>
-              LEVEL ADV
-            </span>
+          <div className="topbar-left">
 
-            <strong>
-              Ambiente jurídico
-            </strong>
+            <button
+              className="mobile-menu"
+              onClick={() =>
+                setMobileOpen(true)
+              }
+            >
+              <Menu size={20} />
+            </button>
+
+            <div>
+              <span>
+                LEVEL ADV
+              </span>
+
+              <strong>
+                Ambiente jurídico
+              </strong>
+            </div>
+
           </div>
 
-          <div className="topbar-user">
-            {user?.email}
+
+          <div className="topbar-actions">
+
+            <div className="appearance-control">
+
+              <button
+                type="button"
+                className="appearance-button"
+                onClick={() =>
+                  setAppearanceOpen(
+                    (current) =>
+                      !current
+                  )
+                }
+                title="Personalizar aparência"
+              >
+                <Palette size={18} />
+
+                <span
+                  className="accent-preview"
+                  style={{
+                    background:
+                      accentColor,
+                  }}
+                />
+              </button>
+
+
+              {appearanceOpen && (
+                <div className="appearance-popover">
+
+                  <div className="appearance-title">
+                    <div>
+                      <span>
+                        APARÊNCIA
+                      </span>
+
+                      <strong>
+                        Cor da sua LEVEL
+                      </strong>
+                    </div>
+
+                    <Palette
+                      size={20}
+                    />
+                  </div>
+
+
+                  <p>
+                    Escolha a cor dos botões,
+                    ícones e detalhes da sua
+                    plataforma.
+                  </p>
+
+
+                  <div className="preset-colors">
+
+                    {presetColors.map(
+                      (color) => (
+                        <button
+                          key={
+                            color.value
+                          }
+                          type="button"
+                          className={
+                            accentColor ===
+                            color.value
+                              ? 'color-option selected'
+                              : 'color-option'
+                          }
+                          onClick={() =>
+                            void saveColor(
+                              color.value
+                            )
+                          }
+                        >
+                          <span
+                            style={{
+                              background:
+                                color.value,
+                            }}
+                          />
+
+                          <strong>
+                            {color.name}
+                          </strong>
+
+                          {accentColor ===
+                            color.value && (
+                            <Check
+                              size={14}
+                            />
+                          )}
+                        </button>
+                      )
+                    )}
+
+                  </div>
+
+
+                  <label className="custom-color">
+
+                    Cor personalizada
+
+                    <div>
+                      <input
+                        type="color"
+                        value={
+                          accentColor
+                        }
+                        onChange={(
+                          event
+                        ) =>
+                          applyColor(
+                            event
+                              .target
+                              .value
+                          )
+                        }
+                      />
+
+                      <input
+                        value={
+                          accentColor
+                        }
+                        onChange={(
+                          event
+                        ) => {
+                          const color =
+                            event
+                              .target
+                              .value
+
+                          if (
+                            /^#[0-9A-Fa-f]{6}$/.test(
+                              color
+                            )
+                          ) {
+                            applyColor(
+                              color
+                            )
+                          } else {
+                            setAccentColor(
+                              color
+                            )
+                          }
+                        }}
+                      />
+                    </div>
+
+                  </label>
+
+
+                  <button
+                    type="button"
+                    className="primary-button appearance-save"
+                    onClick={() => {
+                      if (
+                        /^#[0-9A-Fa-f]{6}$/.test(
+                          accentColor
+                        )
+                      ) {
+                        void saveColor(
+                          accentColor
+                        )
+                      }
+                    }}
+                  >
+                    Salvar minha cor
+                  </button>
+
+                </div>
+              )}
+
+            </div>
+
+
+            <div className="topbar-user">
+              {user?.email}
+            </div>
+
           </div>
+
         </header>
+
 
         <main className="adv-content">
           <Outlet />
         </main>
+
       </section>
+
     </div>
   )
 }

@@ -260,46 +260,45 @@ export function CasesPage() {
       return
     }
 
+    setMessage(
+      'Criando prontuário...'
+    )
+
     const {
       data,
       error,
     } =
-      await supabase
-        .from('adv_cases')
-        .insert({
-          user_id:
-            user.id,
-
-          client_name:
+      await supabase.rpc(
+        'adv_create_case',
+        {
+          p_client_name:
             clientName.trim(),
 
-          client_reference:
+          p_reference:
             reference.trim() ||
             null,
 
-          process_number:
+          p_process_number:
             processNumber.trim() ||
             null,
 
-          bank_name:
+          p_related_party:
             bankName.trim() ||
             null,
-
-          original_debt:
-            0,
-
-          status:
-            'in_progress',
-
-          progress_percent:
-            10,
-        })
-        .select('id')
-        .single()
+        }
+      )
 
     if (error) {
       setMessage(
         error.message
+      )
+
+      return
+    }
+
+    if (!data) {
+      setMessage(
+        'O caso foi processado, mas nenhum identificador foi retornado.'
       )
 
       return
@@ -312,8 +311,10 @@ export function CasesPage() {
     setProcessNumber('')
     setBankName('')
 
+    setMessage('')
+
     navigate(
-      `/app/casos/${data.id}`
+      `/app/casos/${data}`
     )
   }
 
