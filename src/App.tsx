@@ -1,6 +1,5 @@
 import {
   Bot,
-  MessagesSquare,
 } from 'lucide-react'
 
 import {
@@ -50,6 +49,10 @@ import {
 import {
   DocumentsPage,
 } from './pages/DocumentsPage'
+
+import {
+  ForumPage,
+} from './pages/ForumPage'
 
 import {
   GenericCalculatorPage,
@@ -112,7 +115,9 @@ function AppRoutes() {
 
       <Route
         path="/login"
-        element={<LoginPage />}
+        element={
+          <LoginPage />
+        }
       />
 
 
@@ -220,14 +225,15 @@ function AppRoutes() {
         <Route
           path="forum"
           element={
-            <ModulePage
-              eyebrow="EQUIPE"
-              title="Fórum jurídico"
-              description="Discussões e compartilhamento de conhecimento entre membros do escritório."
-              icon={
-                MessagesSquare
-              }
-            />
+            <ForumPage />
+          }
+        />
+
+
+        <Route
+          path="forum/:topicId"
+          element={
+            <ForumPage />
           }
         />
 
