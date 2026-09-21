@@ -1,6 +1,5 @@
 import {
   Bot,
-  MessageCircle,
   MessagesSquare,
 } from 'lucide-react'
 
@@ -39,6 +38,10 @@ import {
 import {
   CaseWorkspacePage,
 } from './pages/CaseWorkspacePage'
+
+import {
+  ChatPage,
+} from './pages/ChatPage'
 
 import {
   DashboardPage,
@@ -106,10 +109,12 @@ function AppRoutes() {
         }
       />
 
+
       <Route
         path="/login"
         element={<LoginPage />}
       />
+
 
       <Route
         path="/app"
@@ -125,12 +130,14 @@ function AppRoutes() {
           }
         />
 
+
         <Route
           path="calculadoras"
           element={
             <CalculatorsPage />
           }
         />
+
 
         <Route
           path="calculadoras/bancario/rotativo"
@@ -139,12 +146,14 @@ function AppRoutes() {
           }
         />
 
+
         <Route
           path="calculadoras/bancario/rotativo/:caseId"
           element={
             <RevolvingCardPage />
           }
         />
+
 
         <Route
           path="calculadoras/:category/:slug"
@@ -153,12 +162,14 @@ function AppRoutes() {
           }
         />
 
+
         <Route
           path="calculadoras/:category"
           element={
             <CalculatorCategoryPage />
           }
         />
+
 
         <Route
           path="casos"
@@ -167,6 +178,7 @@ function AppRoutes() {
           }
         />
 
+
         <Route
           path="casos/:caseId"
           element={
@@ -174,12 +186,14 @@ function AppRoutes() {
           }
         />
 
+
         <Route
           path="documentos"
           element={
             <DocumentsPage />
           }
         />
+
 
         <Route
           path="ia"
@@ -194,17 +208,14 @@ function AppRoutes() {
           }
         />
 
+
         <Route
           path="chat"
           element={
-            <ModulePage
-              eyebrow="COMUNICAÇÃO"
-              title="Chat interno"
-              description="Mensagens privadas entre membros da equipe com expiração operacional em 24 horas."
-              icon={MessageCircle}
-            />
+            <ChatPage />
           }
         />
+
 
         <Route
           path="forum"
@@ -213,10 +224,13 @@ function AppRoutes() {
               eyebrow="EQUIPE"
               title="Fórum jurídico"
               description="Discussões e compartilhamento de conhecimento entre membros do escritório."
-              icon={MessagesSquare}
+              icon={
+                MessagesSquare
+              }
             />
           }
         />
+
 
         <Route
           path="admin"
@@ -226,6 +240,7 @@ function AppRoutes() {
         />
 
       </Route>
+
 
       <Route
         path="*"
