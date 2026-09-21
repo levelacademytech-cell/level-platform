@@ -1,9 +1,11 @@
 import {
   ArrowLeft,
+  BriefcaseBusiness,
   Calculator,
   Info,
   Printer,
   RotateCcw,
+  Save,
 } from 'lucide-react'
 
 import {
@@ -27,6 +29,21 @@ import {
   type CalculationResult,
 } from '../lib/calculatorEngine'
 
+import {
+  useAuth,
+} from '../context/AuthContext'
+
+import {
+  supabase,
+} from '../lib/supabase'
+
+
+type CaseOption = {
+  id: string
+  client_name: string | null
+  client_reference: string | null
+}
+
 
 const money =
   new Intl.NumberFormat(
@@ -39,7 +56,8 @@ const money =
 
 
 function formatResult(
-  result: CalculationResult
+  result:
+    CalculationResult
 ) {
   if (
     result.format ===
@@ -59,8 +77,11 @@ function formatResult(
         .toLocaleString(
           'pt-BR',
           {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 6,
+            minimumFractionDigits:
+              2,
+
+            maximumFractionDigits:
+              6,
           }
         ) +
       '%'
@@ -76,7 +97,8 @@ function formatResult(
         .toLocaleString(
           'pt-BR',
           {
-            maximumFractionDigits: 2,
+            maximumFractionDigits:
+              2,
           }
         ) +
       ' dias'
@@ -92,7 +114,8 @@ function formatResult(
         .toLocaleString(
           'pt-BR',
           {
-            maximumFractionDigits: 2,
+            maximumFractionDigits:
+              2,
           }
         ) +
       ' meses'
@@ -103,7 +126,8 @@ function formatResult(
     .toLocaleString(
       'pt-BR',
       {
-        maximumFractionDigits: 6,
+        maximumFractionDigits:
+          6,
       }
     )
 }
@@ -115,6 +139,12 @@ export function GenericCalculatorPage() {
     slug,
   } =
     useParams()
+
+  const {
+    user,
+  } =
+    useAuth()
+
 
   const definition =
     useMemo(
@@ -130,6 +160,7 @@ export function GenericCalculatorPage() {
         slug,
       ]
     )
+
 
   const [
     values,
@@ -149,6 +180,29 @@ export function GenericCalculatorPage() {
     >([])
 
 
+  const [
+    cases,
+    setCases,
+  ] =
+    useState<
+      CaseOption[]
+    >([])
+
+
+  const [
+    selectedCaseId,
+    setSelectedCaseId,
+  ] =
+    useState('')
+
+
+  const [
+    message,
+    setMessage,
+  ] =
+    useState('')
+
+
   useEffect(() => {
     if (!definition) {
       return
@@ -162,7 +216,7 @@ export function GenericCalculatorPage() {
 
     for (
       const field of
-      definition.fields
+      definition!.fields
     ) {
       defaults[field.key] =
         field.defaultValue ??
@@ -172,6 +226,32 @@ export function GenericCalculatorPage() {
     setValues(defaults)
     setResults([])
   }, [definition])
+
+
+  useEffect(() => {
+    void supabase
+      .from('adv_cases')
+      .select(`
+        id,
+        client_name,
+        client_reference
+      `)
+      .neq(
+        'status',
+        'archived'
+      )
+      .order(
+        'updated_at',
+        {
+          ascending: false,
+        }
+      )
+      .then(({ data }) => {
+        setCases(
+          data ?? []
+        )
+      })
+  }, [])
 
 
   if (!definition) {
@@ -212,6 +292,80 @@ export function GenericCalculatorPage() {
 
     setValues(defaults)
     setResults([])
+    setMessage('')
+  }
+
+
+  async function saveToCase() {
+    if (
+      !user ||
+      !selectedCaseId ||
+      results.length === 0
+    ) {
+      setMessage(
+        'Selecione um caso e realize o cálculo antes de salvar.'
+      )
+
+      return
+    }
+
+    const resultText =
+      results
+        .map(
+          (item) =>
+            `${item.label}: ${formatResult(item)}`
+        )
+        .join('\n')
+
+    const {
+      error,
+    } =
+      await supabase
+        .from(
+          'adv_case_contributions'
+        )
+        .insert({
+          case_id:
+            selectedCaseId,
+
+          user_id:
+            user.id,
+
+          kind:
+            'calculation',
+
+          title:
+            definition!.title,
+
+          body:
+            resultText,
+
+          metadata: {
+            calculator_id:
+              definition!.id,
+
+            category:
+              definition!.category,
+
+            inputs:
+              values,
+
+            results:
+              results,
+          },
+        })
+
+    if (error) {
+      setMessage(
+        error.message
+      )
+
+      return
+    }
+
+    setMessage(
+      'Cálculo salvo no histórico do caso.'
+    )
   }
 
 
@@ -219,36 +373,45 @@ export function GenericCalculatorPage() {
     <div className="page">
 
       <Link
-        to={`/app/calculadoras/${definition.category}`}
+        to={`/app/calculadoras/${definition!.category}`}
         className="calculator-back"
       >
         <ArrowLeft size={15} />
 
         Voltar para{' '}
         {
-          definition.categoryLabel
+          definition!.categoryLabel
         }
       </Link>
 
 
       <div className="page-heading">
+
         <span className="eyebrow">
           {
-            definition.categoryLabel
+            definition!.categoryLabel
           }
           {' / CALCULADORA'}
         </span>
 
         <h1>
-          {definition.title}
+          {definition!.title}
         </h1>
 
         <p>
           {
-            definition.description
+            definition!.description
           }
         </p>
+
       </div>
+
+
+      {message && (
+        <div className="system-message">
+          {message}
+        </div>
+      )}
 
 
       <section className="generic-calculator-layout">
@@ -256,6 +419,7 @@ export function GenericCalculatorPage() {
         <div className="panel">
 
           <div className="panel-heading">
+
             <div>
               <span className="eyebrow">
                 DADOS
@@ -269,12 +433,13 @@ export function GenericCalculatorPage() {
             <Calculator
               size={23}
             />
+
           </div>
 
 
           <div className="generic-fields">
 
-            {definition.fields.map(
+            {definition!.fields.map(
               (field) => (
                 <label
                   key={
@@ -291,13 +456,9 @@ export function GenericCalculatorPage() {
                           field.key
                         ] ?? ''
                       }
-                      onChange={(
-                        event
-                      ) =>
+                      onChange={(event) =>
                         setValues(
-                          (
-                            current
-                          ) => ({
+                          (current) => ({
                             ...current,
 
                             [field.key]:
@@ -309,9 +470,7 @@ export function GenericCalculatorPage() {
                       }
                     >
                       {field.options?.map(
-                        (
-                          option
-                        ) => (
+                        (option) => (
                           <option
                             key={
                               option.value
@@ -349,13 +508,9 @@ export function GenericCalculatorPage() {
                       placeholder={
                         field.placeholder
                       }
-                      onChange={(
-                        event
-                      ) =>
+                      onChange={(event) =>
                         setValues(
-                          (
-                            current
-                          ) => ({
+                          (current) => ({
                             ...current,
 
                             [field.key]:
@@ -366,12 +521,6 @@ export function GenericCalculatorPage() {
                         )
                       }
                     />
-                  )}
-
-                  {field.suffix && (
-                    <small>
-                      {field.suffix}
-                    </small>
                   )}
                 </label>
               )
@@ -400,6 +549,7 @@ export function GenericCalculatorPage() {
         <div className="panel generic-result-panel">
 
           <div className="panel-heading">
+
             <div>
               <span className="eyebrow">
                 RESULTADO
@@ -409,11 +559,12 @@ export function GenericCalculatorPage() {
                 Memória do cálculo
               </h2>
             </div>
+
           </div>
 
 
           {results.length ===
-            0 ? (
+          0 ? (
             <div className="generic-empty">
               Informe os dados e
               clique em calcular.
@@ -442,17 +593,69 @@ export function GenericCalculatorPage() {
                         result
                       )}
                     </strong>
-
-                    {result.note && (
-                      <small>
-                        {
-                          result.note
-                        }
-                      </small>
-                    )}
                   </article>
                 )
               )}
+
+            </div>
+          )}
+
+
+          {results.length > 0 && (
+            <div className="save-calculation-case">
+
+              <div>
+                <BriefcaseBusiness
+                  size={17}
+                />
+
+                <strong>
+                  Salvar no prontuário
+                </strong>
+              </div>
+
+
+              <select
+                value={
+                  selectedCaseId
+                }
+                onChange={(event) =>
+                  setSelectedCaseId(
+                    event.target.value
+                  )
+                }
+              >
+                <option value="">
+                  Selecione um caso
+                </option>
+
+                {cases.map(
+                  (item) => (
+                    <option
+                      key={item.id}
+                      value={item.id}
+                    >
+                      {item.client_name ||
+                        item.client_reference ||
+                        'Caso LEVEL'}
+                    </option>
+                  )
+                )}
+
+              </select>
+
+
+              <button
+                type="button"
+                className="primary-button full-button"
+                onClick={() =>
+                  void saveToCase()
+                }
+              >
+                <Save size={15} />
+
+                Salvar cálculo neste caso
+              </button>
 
             </div>
           )}
@@ -471,6 +674,7 @@ export function GenericCalculatorPage() {
 
               Limpar
             </button>
+
 
             <button
               type="button"
@@ -493,8 +697,9 @@ export function GenericCalculatorPage() {
       </section>
 
 
-      {definition.sourceNote && (
+      {definition!.sourceNote && (
         <section className="legal-box">
+
           <Info size={21} />
 
           <div>
@@ -504,35 +709,13 @@ export function GenericCalculatorPage() {
 
             <p>
               {
-                definition.sourceNote
+                definition!.sourceNote
               }
             </p>
           </div>
+
         </section>
       )}
-
-
-      <section className="legal-box">
-        <Info size={21} />
-
-        <div>
-          <strong>
-            Ferramenta de apoio
-          </strong>
-
-          <p>
-            O resultado é matemático e
-            depende integralmente dos
-            dados informados. Em cálculos
-            jurídicos sujeitos a índices,
-            tabelas, legislação, decisões,
-            convenções ou particularidades
-            do caso, confirme os parâmetros
-            aplicáveis antes de utilizar o
-            resultado profissionalmente.
-          </p>
-        </div>
-      </section>
 
     </div>
   )

@@ -37,6 +37,10 @@ import {
 } from './pages/CasesPage'
 
 import {
+  CaseWorkspacePage,
+} from './pages/CaseWorkspacePage'
+
+import {
   DashboardPage,
 } from './pages/DashboardPage'
 
@@ -160,6 +164,13 @@ function AppRoutes() {
           path="casos"
           element={
             <CasesPage />
+          }
+        />
+
+        <Route
+          path="casos/:caseId"
+          element={
+            <CaseWorkspacePage />
           }
         />
 
