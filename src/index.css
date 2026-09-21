@@ -1850,3 +1850,515 @@ label {
     color: #444;
   }
 }
+
+
+/* LEVEL ADV ROTATIVO V2 */
+
+.calculator-back {
+  width: fit-content;
+
+  display: inline-flex;
+  align-items: center;
+
+  gap: 6px;
+
+  margin-bottom: 25px;
+
+  color: var(--muted);
+
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.calculator-back:hover {
+  color: var(--gold);
+}
+
+
+.case-identification {
+  margin-bottom: 10px;
+}
+
+.case-fields-v2 {
+  grid-template-columns:
+    repeat(
+      3,
+      minmax(0, 1fr)
+    );
+
+  margin-bottom: 0;
+}
+
+.case-fields label small {
+  color: #66738a;
+
+  font-size: 8px;
+  font-weight: 500;
+}
+
+
+.interest-mode-panel {
+  margin-bottom: 10px;
+}
+
+.interest-mode-selector {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      2,
+      minmax(0, 1fr)
+    );
+
+  gap: 8px;
+}
+
+.interest-mode {
+  min-height: 108px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+
+  gap: 7px;
+
+  padding: 17px;
+
+  text-align: left;
+
+  color: #8f9aae;
+
+  border:
+    1px solid var(--line);
+
+  background: #0a101b;
+}
+
+.interest-mode strong {
+  color: #e4e8ef;
+
+  font-size: 12px;
+}
+
+.interest-mode span {
+  font-size: 9px;
+
+  line-height: 1.55;
+}
+
+.interest-mode.active {
+  border-color:
+    #6c582f;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(217, 180, 91, .12),
+      rgba(217, 180, 91, .025)
+    );
+}
+
+.interest-mode.active strong {
+  color: var(--gold);
+}
+
+
+.template-actions {
+  display: grid;
+
+  grid-template-columns:
+    auto
+    minmax(250px, 1fr)
+    auto;
+
+  gap: 8px;
+
+  align-items: center;
+}
+
+
+.finance-table-v2 {
+  min-width: 1890px;
+}
+
+.finance-head-v2,
+.finance-row-v2 {
+  grid-template-columns:
+    120px
+    140px
+    115px
+    115px
+    140px
+    140px
+    140px
+    135px
+    120px
+    110px
+    120px
+    145px
+    40px;
+}
+
+
+.calculated-cell {
+  min-height: 39px;
+
+  display: flex;
+  align-items: center;
+
+  padding:
+    0 10px;
+
+  color: #9ca7b9;
+
+  border:
+    1px solid #1f293a;
+
+  background:
+    rgba(255, 255, 255, .015);
+
+  font-size: 10px;
+}
+
+
+.gold-cell {
+  color: var(--gold);
+}
+
+
+.difference-positive {
+  color: #ff8a8a;
+
+  border-color:
+    rgba(255, 116, 116, .2);
+
+  background:
+    rgba(255, 116, 116, .04);
+}
+
+
+.difference-negative {
+  color: var(--green);
+
+  border-color:
+    rgba(81, 217, 160, .17);
+
+  background:
+    rgba(81, 217, 160, .03);
+}
+
+
+.comparison-panel {
+  margin-top: 10px;
+
+  padding: 22px;
+
+  border:
+    1px solid var(--line);
+
+  background:
+    radial-gradient(
+      circle at 95% 5%,
+      rgba(217, 180, 91, .075),
+      transparent 38%
+    ),
+    #0e1522;
+}
+
+
+.comparison-heading h2 {
+  margin:
+    6px 0 18px;
+}
+
+
+.comparison-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      3,
+      minmax(0, 1fr)
+    );
+
+  gap: 8px;
+}
+
+
+.comparison-grid article {
+  min-height: 120px;
+
+  display: flex;
+  flex-direction: column;
+
+  padding: 17px;
+
+  border:
+    1px solid var(--line);
+
+  background:
+    rgba(0, 0, 0, .14);
+}
+
+
+.comparison-grid span {
+  color: #77849a;
+
+  font-size: 8px;
+  font-weight: 900;
+
+  letter-spacing: .11em;
+}
+
+
+.comparison-grid strong {
+  margin-top: 15px;
+
+  font-size: 24px;
+}
+
+
+.comparison-grid small {
+  margin-top: auto;
+
+  color: var(--muted);
+
+  font-size: 8px;
+}
+
+
+.comparison-alert {
+  border-color:
+    #65383e !important;
+}
+
+
+.comparison-alert strong {
+  color: #ff9696;
+}
+
+
+.result-grid-v2 {
+  grid-template-columns:
+    repeat(
+      3,
+      minmax(0, 1fr)
+    );
+}
+
+
+.conclusion-panel {
+  margin-top: 10px;
+}
+
+
+.conclusion-panel > p {
+  padding:
+    15px;
+
+  color: #b2bccd;
+
+  border-left:
+    2px solid var(--gold);
+
+  background:
+    rgba(217, 180, 91, .035);
+
+  font-size: 11px;
+
+  line-height: 1.7;
+}
+
+
+.conclusion-panel label {
+  margin-top: 17px;
+}
+
+
+.case-list {
+  display: flex;
+  flex-direction: column;
+}
+
+
+.case-list-item {
+  min-height: 100px;
+
+  display: grid;
+
+  grid-template-columns:
+    minmax(250px, 1fr)
+    180px
+    auto;
+
+  gap: 20px;
+
+  align-items: center;
+
+  padding:
+    15px 0;
+
+  border-bottom:
+    1px solid var(--line-soft);
+}
+
+
+.case-list-item:last-child {
+  border-bottom: 0;
+}
+
+
+.case-list-main {
+  display: flex;
+  flex-direction: column;
+
+  gap: 6px;
+}
+
+
+.case-type {
+  color: var(--gold);
+
+  font-size: 7px;
+  font-weight: 900;
+
+  letter-spacing: .14em;
+}
+
+
+.case-list-main > strong {
+  font-size: 13px;
+}
+
+
+.case-meta {
+  display: flex;
+  flex-wrap: wrap;
+
+  gap:
+    5px 12px;
+}
+
+
+.case-meta span {
+  color: var(--muted);
+
+  font-size: 8px;
+}
+
+
+.case-list-value {
+  display: flex;
+  flex-direction: column;
+
+  gap: 5px;
+}
+
+
+.case-list-value span {
+  color: var(--muted);
+
+  font-size: 7px;
+  font-weight: 900;
+
+  letter-spacing: .1em;
+}
+
+
+.case-list-value strong {
+  font-size: 16px;
+}
+
+
+.case-list-actions {
+  display: flex;
+
+  gap: 7px;
+}
+
+
+.case-delete-button {
+  width: 42px;
+  height: 42px;
+
+  display: grid;
+  place-items: center;
+
+  color: var(--red);
+
+  border:
+    1px solid #4d3037;
+
+  background:
+    rgba(255, 116, 116, .03);
+}
+
+
+@media (
+  max-width: 1150px
+) {
+  .case-fields-v2 {
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
+  }
+
+  .result-grid-v2 {
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
+  }
+
+  .case-list-item {
+    grid-template-columns:
+      minmax(0, 1fr)
+      auto;
+  }
+
+  .case-list-value {
+    display: none;
+  }
+}
+
+
+@media (
+  max-width: 700px
+) {
+  .case-fields-v2,
+  .interest-mode-selector,
+  .comparison-grid,
+  .result-grid-v2 {
+    grid-template-columns:
+      1fr;
+  }
+
+  .template-actions {
+    grid-template-columns:
+      1fr;
+  }
+
+  .template-actions
+  .secondary-button,
+  .template-actions
+  .file-picker {
+    width: 100%;
+  }
+
+  .case-list-item {
+    grid-template-columns:
+      1fr;
+  }
+
+  .case-list-actions {
+    width: 100%;
+  }
+
+  .case-list-actions
+  .secondary-button {
+    flex: 1;
+  }
+}

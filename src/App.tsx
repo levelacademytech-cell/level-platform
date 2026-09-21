@@ -135,6 +135,13 @@ function AppRoutes() {
         />
 
         <Route
+          path="calculadoras/bancario/rotativo/:caseId"
+          element={
+            <RevolvingCardPage />
+          }
+        />
+
+        <Route
           path="casos"
           element={
             <CasesPage />
