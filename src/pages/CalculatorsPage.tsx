@@ -1,11 +1,11 @@
 import {
-  Banknote,
   BriefcaseBusiness,
   Calculator,
   Gavel,
   Landmark,
   ReceiptText,
   Scale,
+  Wrench,
 } from 'lucide-react'
 
 import {
@@ -14,64 +14,63 @@ import {
 
 const categories = [
   {
-    name: 'Bancario',
+    id: 'bancario',
+    title: 'Bancário',
     description:
-      'Juros, cartao, financiamentos, amortizacao e revisoes.',
+      'Cartão, juros, financiamento, amortização, CET e comparação de taxas.',
     icon: Landmark,
-    active: true,
-    path:
-      '/app/calculadoras/bancario',
   },
   {
-    name: 'Previdenciario',
+    id: 'previdenciario',
+    title: 'Previdenciário',
     description:
-      'Beneficios, contribuicoes, tempo e planejamento.',
+      'INSS, contribuição, pedágio, fator e honorários.',
     icon: Scale,
-    active: false,
   },
   {
-    name: 'Trabalhista',
+    id: 'trabalhista',
+    title: 'Trabalhista',
     description:
-      'Rescisao, ferias, FGTS, horas extras e salarios.',
+      'Férias, rescisão, FGTS, horas extras, 13º e salário líquido.',
     icon: BriefcaseBusiness,
-    active: false,
   },
   {
-    name: 'Civel',
+    id: 'tributario',
+    title: 'Tributário',
     description:
-      'Atualizacao, indenizacoes, prazos e calculos judiciais.',
-    icon: Gavel,
-    active: false,
-  },
-  {
-    name: 'Tributario',
-    description:
-      'Tributos, restituicoes, ICMS, IR e atualizacoes.',
+      'IR, ITCMD e simulações de bases tributárias.',
     icon: ReceiptText,
-    active: false,
   },
   {
-    name: 'Penal',
+    id: 'civel',
+    title: 'Cível',
     description:
-      'Pena, regime, progressao e parametros de calculo.',
+      'Pensão, execução, atualização e contagem de datas.',
+    icon: Gavel,
+  },
+  {
+    id: 'penal',
+    title: 'Penal',
+    description:
+      'Simulações aritméticas de pena e progressão.',
     icon: Calculator,
-    active: false,
   },
   {
-    name: 'Utilidades',
+    id: 'utilidades',
+    title: 'Utilidades',
     description:
-      'Ferramentas auxiliares para o trabalho juridico.',
-    icon: Banknote,
-    active: false,
+      'Percentuais, honorários e contagem de dias úteis.',
+    icon: Wrench,
   },
 ]
 
 export function CalculatorsPage() {
   return (
     <div className="page">
+
       <div className="page-heading">
         <span className="eyebrow">
-          FERRAMENTAS
+          LEVEL ADV / FERRAMENTAS
         </span>
 
         <h1>
@@ -79,39 +78,41 @@ export function CalculatorsPage() {
         </h1>
 
         <p>
-          Ferramentas organizadas
-          por área jurídica. Novos
-          módulos serão liberados
-          progressivamente.
+          Escolha uma área jurídica.
+          Todas as categorias abaixo
+          já possuem ferramentas
+          funcionais.
         </p>
       </div>
 
+
       <div className="category-grid">
+
         {categories.map(
           (category) => {
             const Icon =
               category.icon
 
-            const content = (
-              <>
+            return (
+              <Link
+                key={
+                  category.id
+                }
+                to={`/app/calculadoras/${category.id}`}
+                className="category-card active-card"
+              >
                 <div className="category-icon">
                   <Icon size={22} />
                 </div>
 
-                <span
-                  className={
-                    category.active
-                      ? 'status available'
-                      : 'status'
-                  }
-                >
-                  {category.active
-                    ? 'DISPONIVEL'
-                    : 'EM DESENVOLVIMENTO'}
+                <span className="status available">
+                  DISPONÍVEL
                 </span>
 
                 <h2>
-                  {category.name}
+                  {
+                    category.title
+                  }
                 </h2>
 
                 <p>
@@ -121,39 +122,15 @@ export function CalculatorsPage() {
                 </p>
 
                 <strong>
-                  {category.active
-                    ? 'Abrir categoria →'
-                    : 'Em breve'}
+                  Ver calculadoras →
                 </strong>
-              </>
-            )
-
-            if (
-              category.active &&
-              category.path
-            ) {
-              return (
-                <Link
-                  className="category-card active-card"
-                  key={category.name}
-                  to={category.path}
-                >
-                  {content}
-                </Link>
-              )
-            }
-
-            return (
-              <article
-                className="category-card disabled-card"
-                key={category.name}
-              >
-                {content}
-              </article>
+              </Link>
             )
           }
         )}
+
       </div>
+
     </div>
   )
 }

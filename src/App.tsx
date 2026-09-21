@@ -25,8 +25,8 @@ import {
 } from './pages/AdminPage'
 
 import {
-  BankingPage,
-} from './pages/BankingPage'
+  CalculatorCategoryPage,
+} from './pages/CalculatorCategoryPage'
 
 import {
   CalculatorsPage,
@@ -45,6 +45,10 @@ import {
 } from './pages/DocumentsPage'
 
 import {
+  GenericCalculatorPage,
+} from './pages/GenericCalculatorPage'
+
+import {
   LoginPage,
 } from './pages/LoginPage'
 
@@ -55,6 +59,7 @@ import {
 import {
   RevolvingCardPage,
 } from './pages/RevolvingCardPage'
+
 
 function ProtectedLayout() {
   const {
@@ -82,9 +87,11 @@ function ProtectedLayout() {
   return <AppLayout />
 }
 
+
 function AppRoutes() {
   return (
     <Routes>
+
       <Route
         path="/"
         element={
@@ -106,6 +113,7 @@ function AppRoutes() {
           <ProtectedLayout />
         }
       >
+
         <Route
           index
           element={
@@ -121,13 +129,6 @@ function AppRoutes() {
         />
 
         <Route
-          path="calculadoras/bancario"
-          element={
-            <BankingPage />
-          }
-        />
-
-        <Route
           path="calculadoras/bancario/rotativo"
           element={
             <RevolvingCardPage />
@@ -138,6 +139,20 @@ function AppRoutes() {
           path="calculadoras/bancario/rotativo/:caseId"
           element={
             <RevolvingCardPage />
+          }
+        />
+
+        <Route
+          path="calculadoras/:category/:slug"
+          element={
+            <GenericCalculatorPage />
+          }
+        />
+
+        <Route
+          path="calculadoras/:category"
+          element={
+            <CalculatorCategoryPage />
           }
         />
 
@@ -159,9 +174,9 @@ function AppRoutes() {
           path="ia"
           element={
             <ModulePage
-              eyebrow="INTELIGENCIA JURIDICA"
+              eyebrow="INTELIGÊNCIA JURÍDICA"
               title="LEVEL IA"
-              description="Leitura de documentos, organizacao de informacoes e apoio inteligente para a equipe."
+              description="Leitura de documentos, organização de informações e apoio inteligente para a equipe."
               icon={Bot}
               beta
             />
@@ -172,12 +187,10 @@ function AppRoutes() {
           path="chat"
           element={
             <ModulePage
-              eyebrow="COMUNICACAO"
+              eyebrow="COMUNICAÇÃO"
               title="Chat interno"
-              description="Mensagens privadas entre membros da equipe com expiracao operacional em 24 horas."
-              icon={
-                MessageCircle
-              }
+              description="Mensagens privadas entre membros da equipe com expiração operacional em 24 horas."
+              icon={MessageCircle}
             />
           }
         />
@@ -187,11 +200,9 @@ function AppRoutes() {
           element={
             <ModulePage
               eyebrow="EQUIPE"
-              title="Forum juridico"
-              description="Espaco permanente para discussoes, duvidas internas e compartilhamento de conhecimento."
-              icon={
-                MessagesSquare
-              }
+              title="Fórum jurídico"
+              description="Discussões e compartilhamento de conhecimento entre membros do escritório."
+              icon={MessagesSquare}
             />
           }
         />
@@ -202,6 +213,7 @@ function AppRoutes() {
             <AdminPage />
           }
         />
+
       </Route>
 
       <Route
@@ -213,9 +225,11 @@ function AppRoutes() {
           />
         }
       />
+
     </Routes>
   )
 }
+
 
 export default function App() {
   return (
