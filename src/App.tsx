@@ -1,8 +1,4 @@
 import {
-  Bot,
-} from 'lucide-react'
-
-import {
   BrowserRouter,
   Navigate,
   Route,
@@ -69,10 +65,6 @@ import {
 import {
   LoginPage,
 } from './pages/LoginPage'
-
-import {
-  ModulePage,
-} from './pages/ModulePage'
 
 import {
   RevolvingCardPage,
@@ -215,19 +207,6 @@ function AppRoutes() {
           path="gerador-documentos/documento/:documentId"
           element={
             <DocumentGeneratorPage />
-          }
-        />
-
-        <Route
-          path="ia"
-          element={
-            <ModulePage
-              eyebrow="INTELIGÃŠNCIA JURÃDICA"
-              title="LEVEL IA"
-              description="Leitura de documentos, organizaÃ§Ã£o de informaÃ§Ãµes e apoio inteligente para a equipe."
-              icon={Bot}
-              beta
-            />
           }
         />
 

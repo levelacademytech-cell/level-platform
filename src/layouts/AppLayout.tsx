@@ -1,5 +1,4 @@
 import {
-  Bot,
   BriefcaseBusiness,
   Calculator,
   Check,
@@ -61,12 +60,6 @@ const mainItems = [
     to: '/app/gerador-documentos',
     label: 'Gerador de documentos',
     icon: FileSignature,
-  },
-  {
-    to: '/app/ia',
-    label: 'LEVEL IA',
-    icon: Bot,
-    badge: 'BETA',
   },
   {
     to: '/app/chat',
@@ -308,12 +301,6 @@ export function AppLayout() {
                   <span>
                     {item.label}
                   </span>
-
-                  {item.badge && (
-                    <small>
-                      {item.badge}
-                    </small>
-                  )}
                 </NavLink>
               )
             }
