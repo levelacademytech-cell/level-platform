@@ -3,6 +3,7 @@ import {
   BriefcaseBusiness,
   Calculator,
   Check,
+  FileSignature,
   FileText,
   LayoutDashboard,
   LogOut,
@@ -55,6 +56,11 @@ const mainItems = [
     to: '/app/documentos',
     label: 'Documentos',
     icon: FileText,
+  },
+  {
+    to: '/app/gerador-documentos',
+    label: 'Gerador de documentos',
+    icon: FileSignature,
   },
   {
     to: '/app/ia',

@@ -15,6 +15,10 @@ import {
 } from './context/AuthContext'
 
 import {
+  LegalGate,
+} from './components/LegalGate'
+
+import {
   AppLayout,
 } from './layouts/AppLayout'
 
@@ -47,6 +51,10 @@ import {
 } from './pages/DashboardPage'
 
 import {
+  DocumentGeneratorPage,
+} from './pages/DocumentGeneratorPage'
+
+import {
   DocumentsPage,
 } from './pages/DocumentsPage'
 
@@ -69,7 +77,6 @@ import {
 import {
   RevolvingCardPage,
 } from './pages/RevolvingCardPage'
-
 
 function ProtectedLayout() {
   const {
@@ -94,14 +101,16 @@ function ProtectedLayout() {
     )
   }
 
-  return <AppLayout />
+  return (
+    <LegalGate>
+      <AppLayout />
+    </LegalGate>
+  )
 }
-
 
 function AppRoutes() {
   return (
     <Routes>
-
       <Route
         path="/"
         element={
@@ -112,7 +121,6 @@ function AppRoutes() {
         }
       />
 
-
       <Route
         path="/login"
         element={
@@ -120,21 +128,18 @@ function AppRoutes() {
         }
       />
 
-
       <Route
         path="/app"
         element={
           <ProtectedLayout />
         }
       >
-
         <Route
           index
           element={
             <DashboardPage />
           }
         />
-
 
         <Route
           path="calculadoras"
@@ -143,14 +148,12 @@ function AppRoutes() {
           }
         />
 
-
         <Route
           path="calculadoras/bancario/rotativo"
           element={
             <RevolvingCardPage />
           }
         />
-
 
         <Route
           path="calculadoras/bancario/rotativo/:caseId"
@@ -159,14 +162,12 @@ function AppRoutes() {
           }
         />
 
-
         <Route
           path="calculadoras/:category/:slug"
           element={
             <GenericCalculatorPage />
           }
         />
-
 
         <Route
           path="calculadoras/:category"
@@ -175,14 +176,12 @@ function AppRoutes() {
           }
         />
 
-
         <Route
           path="casos"
           element={
             <CasesPage />
           }
         />
-
 
         <Route
           path="casos/:caseId"
@@ -191,7 +190,6 @@ function AppRoutes() {
           }
         />
 
-
         <Route
           path="documentos"
           element={
@@ -199,20 +197,39 @@ function AppRoutes() {
           }
         />
 
+        <Route
+          path="gerador-documentos"
+          element={
+            <DocumentGeneratorPage />
+          }
+        />
+
+        <Route
+          path="gerador-documentos/modelo/:templateId"
+          element={
+            <DocumentGeneratorPage />
+          }
+        />
+
+        <Route
+          path="gerador-documentos/documento/:documentId"
+          element={
+            <DocumentGeneratorPage />
+          }
+        />
 
         <Route
           path="ia"
           element={
             <ModulePage
-              eyebrow="INTELIGÊNCIA JURÍDICA"
+              eyebrow="INTELIGÃŠNCIA JURÃDICA"
               title="LEVEL IA"
-              description="Leitura de documentos, organização de informações e apoio inteligente para a equipe."
+              description="Leitura de documentos, organizaÃ§Ã£o de informaÃ§Ãµes e apoio inteligente para a equipe."
               icon={Bot}
               beta
             />
           }
         />
-
 
         <Route
           path="chat"
@@ -221,14 +238,12 @@ function AppRoutes() {
           }
         />
 
-
         <Route
           path="forum"
           element={
             <ForumPage />
           }
         />
-
 
         <Route
           path="forum/:topicId"
@@ -237,16 +252,13 @@ function AppRoutes() {
           }
         />
 
-
         <Route
           path="admin"
           element={
             <AdminPage />
           }
         />
-
       </Route>
-
 
       <Route
         path="*"
@@ -257,11 +269,9 @@ function AppRoutes() {
           />
         }
       />
-
     </Routes>
   )
 }
-
 
 export default function App() {
   return (

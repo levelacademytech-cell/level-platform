@@ -26,13 +26,23 @@ import {
   supabase,
 } from '../lib/supabase'
 
+import {
+  LEGAL_VERSION,
+} from '../legal/legalDocuments'
+
+import type {
+  LegalDocumentCode,
+} from '../legal/legalDocuments'
+
+import {
+  LegalDialog,
+} from '../components/LegalDialog'
 
 type AuthMode =
   | 'login'
   | 'signup'
   | 'forgot'
   | 'recovery'
-
 
 export function LoginPage() {
   const navigate =
@@ -98,6 +108,37 @@ export function LoginPage() {
   ] =
     useState(false)
 
+  const [
+    termsAccepted,
+    setTermsAccepted,
+  ] =
+    useState(false)
+
+  const [
+    privacyAccepted,
+    setPrivacyAccepted,
+  ] =
+    useState(false)
+
+  const [
+    thirdPartyAccepted,
+    setThirdPartyAccepted,
+  ] =
+    useState(false)
+
+  const [
+    marketingOptIn,
+    setMarketingOptIn,
+  ] =
+    useState(false)
+
+  const [
+    legalOpen,
+    setLegalOpen,
+  ] =
+    useState<LegalDocumentCode | null>(
+      null
+    )
 
   useEffect(() => {
     const params =
@@ -111,7 +152,6 @@ export function LoginPage() {
     ) {
       setMode('recovery')
     }
-
 
     const {
       data: listener,
@@ -128,7 +168,6 @@ export function LoginPage() {
           }
         )
 
-
     return () => {
       listener
         .subscription
@@ -136,24 +175,19 @@ export function LoginPage() {
     }
   }, [])
 
-
   function clearFeedback() {
     setMessage('')
     setSuccess(false)
   }
 
-
   function switchMode(
     next: AuthMode
   ) {
     clearFeedback()
-
     setPassword('')
     setPasswordConfirm('')
-
     setMode(next)
   }
-
 
   async function login(
     event: FormEvent
@@ -184,7 +218,6 @@ export function LoginPage() {
             email
               .trim()
               .toLowerCase(),
-
           password,
         })
 
@@ -192,7 +225,7 @@ export function LoginPage() {
 
     if (error) {
       setMessage(
-        'E-mail ou senha inválidos.'
+        'E-mail ou senha invÃ¡lidos.'
       )
 
       return
@@ -205,7 +238,6 @@ export function LoginPage() {
       }
     )
   }
-
 
   async function signup(
     event: FormEvent
@@ -225,7 +257,6 @@ export function LoginPage() {
       return
     }
 
-
     if (
       password.length < 8
     ) {
@@ -236,21 +267,30 @@ export function LoginPage() {
       return
     }
 
-
     if (
       password !==
       passwordConfirm
     ) {
       setMessage(
-        'As senhas não coincidem.'
+        'As senhas nÃ£o coincidem.'
       )
 
       return
     }
 
+    if (
+      !termsAccepted ||
+      !privacyAccepted ||
+      !thirdPartyAccepted
+    ) {
+      setMessage(
+        'VocÃª precisa marcar os trÃªs itens obrigatÃ³rios de uso e privacidade.'
+      )
+
+      return
+    }
 
     setLoading(true)
-
 
     const {
       data,
@@ -279,13 +319,29 @@ export function LoginPage() {
               display_name:
                 `${firstName.trim()} ${lastName.trim()}`
                   .trim(),
+
+              accepted_terms:
+                true,
+
+              accepted_privacy:
+                true,
+
+              accepted_third_party:
+                true,
+
+              legal_version:
+                LEGAL_VERSION,
+
+              marketing_opt_in:
+                marketingOptIn,
+
+              user_agent:
+                navigator.userAgent,
             },
           },
         })
 
-
     setLoading(false)
-
 
     if (error) {
       setMessage(
@@ -294,7 +350,6 @@ export function LoginPage() {
 
       return
     }
-
 
     if (data.session) {
       navigate(
@@ -307,14 +362,12 @@ export function LoginPage() {
       return
     }
 
-
     setSuccess(true)
 
     setMessage(
-      'Conta criada. Verifique seu e-mail para confirmar o cadastro e depois faça login.'
+      'Conta criada. Verifique seu e-mail para confirmar o cadastro e depois faÃ§a login.'
     )
   }
-
 
   async function forgotPassword(
     event: FormEvent
@@ -331,9 +384,7 @@ export function LoginPage() {
       return
     }
 
-
     setLoading(true)
-
 
     const {
       error,
@@ -349,9 +400,7 @@ export function LoginPage() {
           }
         )
 
-
     setLoading(false)
-
 
     if (error) {
       setMessage(
@@ -361,14 +410,12 @@ export function LoginPage() {
       return
     }
 
-
     setSuccess(true)
 
     setMessage(
-      'Se o e-mail estiver cadastrado, você receberá as instruções para criar uma nova senha.'
+      'Se o e-mail estiver cadastrado, vocÃª receberÃ¡ as instruÃ§Ãµes para criar uma nova senha.'
     )
   }
-
 
   async function updatePassword(
     event: FormEvent
@@ -387,21 +434,18 @@ export function LoginPage() {
       return
     }
 
-
     if (
       password !==
       passwordConfirm
     ) {
       setMessage(
-        'As senhas não coincidem.'
+        'As senhas nÃ£o coincidem.'
       )
 
       return
     }
 
-
     setLoading(true)
-
 
     const {
       error,
@@ -410,7 +454,6 @@ export function LoginPage() {
         .updateUser({
           password,
         })
-
 
     if (error) {
       setLoading(false)
@@ -422,20 +465,17 @@ export function LoginPage() {
       return
     }
 
-
     await supabase.auth
       .signOut()
 
-
     setLoading(false)
-
     setPassword('')
     setPasswordConfirm('')
 
     setSuccess(true)
 
     setMessage(
-      'Senha atualizada com sucesso. Faça login com sua nova senha.'
+      'Senha atualizada com sucesso. FaÃ§a login com sua nova senha.'
     )
 
     setMode('login')
@@ -447,12 +487,9 @@ export function LoginPage() {
     )
   }
 
-
   return (
     <main className="level-auth">
-
       <section className="level-auth-visual">
-
         <div className="level-auth-brand">
           <strong>
             LEVEL
@@ -463,46 +500,36 @@ export function LoginPage() {
           </span>
         </div>
 
-
         <div className="level-auth-copy">
-
           <span>
-            AMBIENTE JURÍDICO
+            AMBIENTE JURÃDICO
           </span>
 
           <h1>
-            Inteligência para
-            decisões jurídicas.
+            InteligÃªncia para
+            decisÃµes jurÃ­dicas.
           </h1>
 
           <p>
-            Cálculos, casos, documentos,
-            colaboração e ferramentas para
-            a rotina do escritório em um
-            único ambiente.
+            CÃ¡lculos, casos, documentos,
+            colaboraÃ§Ã£o e ferramentas para
+            a rotina do escritÃ³rio em um
+            Ãºnico ambiente.
           </p>
-
         </div>
-
 
         <div className="level-auth-footer">
           LEVEL ADV
-          <span>•</span>
+          <span>â€¢</span>
           Ambiente profissional
         </div>
-
       </section>
 
-
       <section className="level-auth-access">
-
         <div className="level-auth-card">
-
           {mode === 'login' && (
             <>
-
               <div className="auth-title">
-
                 <span>
                   ACESSO
                 </span>
@@ -513,16 +540,13 @@ export function LoginPage() {
 
                 <p>
                   Use seu e-mail e senha
-                  para acessar o escritório.
+                  para acessar o escritÃ³rio.
                 </p>
-
               </div>
-
 
               <form
                 onSubmit={login}
               >
-
                 <label>
                   E-mail
 
@@ -542,7 +566,6 @@ export function LoginPage() {
                     />
                   </div>
                 </label>
-
 
                 <label>
                   Senha
@@ -590,7 +613,6 @@ export function LoginPage() {
                   </div>
                 </label>
 
-
                 <button
                   type="button"
                   className="forgot-link"
@@ -602,7 +624,6 @@ export function LoginPage() {
                 >
                   Esqueci minha senha
                 </button>
-
 
                 {message && (
                   <div
@@ -622,7 +643,6 @@ export function LoginPage() {
                   </div>
                 )}
 
-
                 <button
                   type="submit"
                   className="auth-main-button"
@@ -632,16 +652,13 @@ export function LoginPage() {
                     ? 'Entrando...'
                     : 'Entrar'}
                 </button>
-
               </form>
-
 
               <div className="auth-divider">
                 <span>
                   NOVO NA LEVEL?
                 </span>
               </div>
-
 
               <button
                 type="button"
@@ -653,17 +670,13 @@ export function LoginPage() {
                 }
               >
                 <UserPlus size={17} />
-
                 Criar minha conta
               </button>
-
             </>
           )}
 
-
           {mode === 'signup' && (
             <>
-
               <button
                 type="button"
                 className="auth-back"
@@ -673,16 +686,11 @@ export function LoginPage() {
                   )
                 }
               >
-                <ArrowLeft
-                  size={15}
-                />
-
+                <ArrowLeft size={15} />
                 Voltar
               </button>
 
-
               <div className="auth-title">
-
                 <span>
                   NOVO ACESSO
                 </span>
@@ -692,19 +700,16 @@ export function LoginPage() {
                 </h2>
 
                 <p>
-                  Cadastre seus dados para
-                  utilizar a LEVEL ADV.
+                  Cadastre seus dados e
+                  revise os documentos de
+                  uso e privacidade.
                 </p>
-
               </div>
-
 
               <form
                 onSubmit={signup}
               >
-
                 <div className="auth-name-grid">
-
                   <label>
                     Nome
 
@@ -719,7 +724,6 @@ export function LoginPage() {
                     />
                   </label>
 
-
                   <label>
                     Sobrenome
 
@@ -733,9 +737,7 @@ export function LoginPage() {
                       placeholder="Sobrenome"
                     />
                   </label>
-
                 </div>
-
 
                 <label>
                   E-mail
@@ -757,14 +759,11 @@ export function LoginPage() {
                   </div>
                 </label>
 
-
                 <label>
                   Senha
 
                   <div className="auth-input">
-                    <LockKeyhole
-                      size={17}
-                    />
+                    <LockKeyhole size={17} />
 
                     <input
                       type={
@@ -779,7 +778,7 @@ export function LoginPage() {
                           event.target.value
                         )
                       }
-                      placeholder="Mínimo de 8 caracteres"
+                      placeholder="MÃ­nimo de 8 caracteres"
                     />
 
                     <button
@@ -792,26 +791,19 @@ export function LoginPage() {
                       }
                     >
                       {showPassword ? (
-                        <EyeOff
-                          size={17}
-                        />
+                        <EyeOff size={17} />
                       ) : (
-                        <Eye
-                          size={17}
-                        />
+                        <Eye size={17} />
                       )}
                     </button>
                   </div>
                 </label>
 
-
                 <label>
                   Confirmar senha
 
                   <div className="auth-input">
-                    <KeyRound
-                      size={17}
-                    />
+                    <KeyRound size={17} />
 
                     <input
                       type="password"
@@ -829,6 +821,110 @@ export function LoginPage() {
                   </div>
                 </label>
 
+                <div className="legal-checks">
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={termsAccepted}
+                      onChange={(event) =>
+                        setTermsAccepted(
+                          event.target.checked
+                        )
+                      }
+                    />
+
+                    <span>
+                      Li e aceito os
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setLegalOpen(
+                            'terms'
+                          )
+                        }
+                      >
+                        Termos de Uso
+                      </button>.
+                    </span>
+                  </label>
+
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={privacyAccepted}
+                      onChange={(event) =>
+                        setPrivacyAccepted(
+                          event.target.checked
+                        )
+                      }
+                    />
+
+                    <span>
+                      Li a
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setLegalOpen(
+                            'privacy'
+                          )
+                        }
+                      >
+                        PolÃ­tica de Privacidade
+                      </button>
+                      e estou ciente do
+                      tratamento de dados.
+                    </span>
+                  </label>
+
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={thirdPartyAccepted}
+                      onChange={(event) =>
+                        setThirdPartyAccepted(
+                          event.target.checked
+                        )
+                      }
+                    />
+
+                    <span>
+                      Declaro possuir fundamento
+                      jurÃ­dico adequado para
+                      inserir dados e documentos
+                      de terceiros.
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setLegalOpen(
+                            'thirdParty'
+                          )
+                        }
+                      >
+                        Ver declaraÃ§Ã£o
+                      </button>
+                    </span>
+                  </label>
+
+                  <label className="optional">
+                    <input
+                      type="checkbox"
+                      checked={marketingOptIn}
+                      onChange={(event) =>
+                        setMarketingOptIn(
+                          event.target.checked
+                        )
+                      }
+                    />
+
+                    <span>
+                      Quero receber novidades
+                      e comunicaÃ§Ãµes da LEVEL ADV.
+                      <small>
+                        Opcional.
+                      </small>
+                    </span>
+                  </label>
+                </div>
 
                 {message && (
                   <div
@@ -839,15 +935,12 @@ export function LoginPage() {
                     }
                   >
                     {success && (
-                      <CheckCircle2
-                        size={16}
-                      />
+                      <CheckCircle2 size={16} />
                     )}
 
                     {message}
                   </div>
                 )}
-
 
                 <button
                   type="submit"
@@ -858,16 +951,12 @@ export function LoginPage() {
                     ? 'Criando conta...'
                     : 'Criar conta'}
                 </button>
-
               </form>
-
             </>
           )}
 
-
           {mode === 'forgot' && (
             <>
-
               <button
                 type="button"
                 className="auth-back"
@@ -877,18 +966,13 @@ export function LoginPage() {
                   )
                 }
               >
-                <ArrowLeft
-                  size={15}
-                />
-
+                <ArrowLeft size={15} />
                 Voltar
               </button>
 
-
               <div className="auth-title">
-
                 <span>
-                  RECUPERAÇÃO
+                  RECUPERAÃ‡ÃƒO
                 </span>
 
                 <h2>
@@ -896,20 +980,17 @@ export function LoginPage() {
                 </h2>
 
                 <p>
-                  Informe o e-mail da sua conta.
-                  A LEVEL enviará o link de
-                  recuperação.
+                  Informe o e-mail da sua
+                  conta para receber o link
+                  de recuperaÃ§Ã£o.
                 </p>
-
               </div>
-
 
               <form
                 onSubmit={
                   forgotPassword
                 }
               >
-
                 <label>
                   E-mail
 
@@ -929,7 +1010,6 @@ export function LoginPage() {
                   </div>
                 </label>
 
-
                 {message && (
                   <div
                     className={
@@ -948,7 +1028,6 @@ export function LoginPage() {
                   </div>
                 )}
 
-
                 <button
                   type="submit"
                   className="auth-main-button"
@@ -956,20 +1035,15 @@ export function LoginPage() {
                 >
                   {loading
                     ? 'Enviando...'
-                    : 'Enviar link de recuperação'}
+                    : 'Enviar link de recuperaÃ§Ã£o'}
                 </button>
-
               </form>
-
             </>
           )}
 
-
           {mode === 'recovery' && (
             <>
-
               <div className="auth-title">
-
                 <span>
                   NOVA SENHA
                 </span>
@@ -980,25 +1054,20 @@ export function LoginPage() {
 
                 <p>
                   Crie uma nova senha para
-                  recuperar o acesso à LEVEL.
+                  recuperar seu acesso.
                 </p>
-
               </div>
-
 
               <form
                 onSubmit={
                   updatePassword
                 }
               >
-
                 <label>
                   Nova senha
 
                   <div className="auth-input">
-                    <LockKeyhole
-                      size={17}
-                    />
+                    <LockKeyhole size={17} />
 
                     <input
                       type={
@@ -1012,19 +1081,16 @@ export function LoginPage() {
                           event.target.value
                         )
                       }
-                      placeholder="Mínimo de 8 caracteres"
+                      placeholder="MÃ­nimo de 8 caracteres"
                     />
                   </div>
                 </label>
-
 
                 <label>
                   Confirmar nova senha
 
                   <div className="auth-input">
-                    <KeyRound
-                      size={17}
-                    />
+                    <KeyRound size={17} />
 
                     <input
                       type="password"
@@ -1041,13 +1107,11 @@ export function LoginPage() {
                   </div>
                 </label>
 
-
                 {message && (
                   <div className="auth-message">
                     {message}
                   </div>
                 )}
-
 
                 <button
                   type="submit"
@@ -1058,16 +1122,46 @@ export function LoginPage() {
                     ? 'Atualizando...'
                     : 'Salvar nova senha'}
                 </button>
-
               </form>
-
             </>
           )}
 
-        </div>
+          <div className="login-legal-footer">
+            <button
+              type="button"
+              onClick={() =>
+                setLegalOpen(
+                  'terms'
+                )
+              }
+            >
+              Termos
+            </button>
 
+            <button
+              type="button"
+              onClick={() =>
+                setLegalOpen(
+                  'privacy'
+                )
+              }
+            >
+              Privacidade
+            </button>
+
+            <span>
+              LGPD â€¢ v{LEGAL_VERSION}
+            </span>
+          </div>
+        </div>
       </section>
 
+      <LegalDialog
+        code={legalOpen}
+        onClose={() =>
+          setLegalOpen(null)
+        }
+      />
     </main>
   )
 }
