@@ -1,5 +1,5 @@
 {
-  "name": "level",
+  "name": "level-adv",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -12,9 +12,11 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.116.0",
     "lucide-react": "^1.47.0",
+    "pdfjs-dist": "^6.3.289",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "react-router-dom": "^7.18.4"
+    "react-router-dom": "^7.18.4",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

@@ -1,280 +1,228 @@
 import {
-  ArrowRight,
-  BookOpen,
+  Bot,
   BriefcaseBusiness,
-  CalendarDays,
-  Flame,
-  Gift,
-  Landmark,
-  MessageCircleMore,
-  ShoppingBag,
+  Calculator,
+  FileText,
+  Plus,
   Sparkles,
-  Trophy,
 } from 'lucide-react'
 
-import { Link } from 'react-router-dom'
+import {
+  useEffect,
+  useState,
+} from 'react'
 
-import { useAuth } from '../features/auth/context/AuthContext'
-import { useTheme } from '../theme/ThemeContext'
-import { themePresets } from '../theme/presets'
+import {
+  Link,
+} from 'react-router-dom'
 
-const modules = [
-  {
-    title: 'Continuar estudando',
-    description:
-      'Retome suas trilhas, conteúdos e atividades.',
-    icon: BookOpen,
-    path: '/app/estudar',
-    className: 'blue',
-  },
-  {
-    title: 'Arena Level',
-    description:
-      'Jogue, aprenda, ganhe XP e suba no ranking.',
-    icon: Trophy,
-    path: '/app/arena',
-    className: 'purple',
-  },
-  {
-    title: 'Carreira',
-    description:
-      'Currículo, vagas, estágios e oportunidades.',
-    icon: BriefcaseBusiness,
-    path: '/app/carreira',
-    className: 'cyan',
-  },
-  {
-    title: 'Concursos & Provas',
-    description:
-      'Preparatórios, inscrições e simulados.',
-    icon: Landmark,
-    path: '/app/concursos',
-    className: 'gold',
-  },
-  {
-    title: 'Comunidade',
-    description:
-      'Converse, compartilhe e aprenda em grupo.',
-    icon: MessageCircleMore,
-    path: '/app/comunidade',
-    className: 'pink',
-  },
-  {
-    title: 'LEVEL Rewards',
-    description:
-      'Troque moedas por benefícios e experiências.',
-    icon: Gift,
-    path: '/app/recompensas',
-    className: 'green',
-  },
-  {
-    title: 'LEVEL Store',
-    description:
-      'Produtos, livros, materiais e itens da marca.',
-    icon: ShoppingBag,
-    path: '/app/store',
-    className: 'orange',
-  },
-]
+import {
+  supabase,
+} from '../lib/supabase'
 
 export function DashboardPage() {
-  const { user } = useAuth()
+  const [cases, setCases] =
+    useState(0)
 
-  const {
-    preset,
-    promosEnabled,
-    playSound,
-  } = useTheme()
+  const [documents, setDocuments] =
+    useState(0)
 
-  const theme = themePresets[preset]
+  const [requests, setRequests] =
+    useState(0)
 
-  const firstName =
-    user?.user_metadata?.first_name ??
-    'Aluno'
+  useEffect(() => {
+    void Promise.all([
+      supabase
+        .from('adv_cases')
+        .select(
+          'id',
+          {
+            count: 'exact',
+            head: true,
+          }
+        ),
+
+      supabase
+        .from('adv_documents')
+        .select(
+          'id',
+          {
+            count: 'exact',
+            head: true,
+          }
+        ),
+
+      supabase
+        .from(
+          'adv_analysis_requests'
+        )
+        .select(
+          'id',
+          {
+            count: 'exact',
+            head: true,
+          }
+        ),
+    ]).then(
+      ([
+        caseResult,
+        documentResult,
+        requestResult,
+      ]) => {
+        setCases(
+          caseResult.count ?? 0
+        )
+
+        setDocuments(
+          documentResult.count ?? 0
+        )
+
+        setRequests(
+          requestResult.count ?? 0
+        )
+      }
+    )
+  }, [])
 
   return (
-    <div className="dashboard page-enter">
-      <section className="hero-card glass">
-        <div className="hero-copy">
-          <span className="hero-eyebrow">
-            {theme.eyebrow}
+    <div className="page">
+      <section className="hero-panel">
+        <div>
+          <span className="eyebrow">
+            LEVEL ADV
           </span>
 
-          <h1>{theme.heroTitle}</h1>
+          <h1>
+            Seu centro de
+            inteligência jurídica.
+          </h1>
 
           <p>
-            {theme.heroSubtitle}
+            Calcule, organize casos,
+            analise documentos e
+            centralize ferramentas
+            para sua equipe.
           </p>
 
           <div className="hero-actions">
             <Link
               className="primary-button"
-              to="/app/estudar"
-              onClick={() => playSound('click')}
+              to="/app/calculadoras/bancario/rotativo"
             >
-              Continuar estudando
-              <ArrowRight size={18} />
+              <Calculator size={17} />
+              Nova análise
             </Link>
 
             <Link
               className="secondary-button"
-              to="/app/arena"
-              onClick={() => playSound('click')}
+              to="/app/calculadoras"
             >
-              <Trophy size={18} />
-              Arena Level
+              Ver calculadoras
             </Link>
           </div>
         </div>
 
-        <div className="hero-visual">
-          <div className="hero-3d-object">
-            <span>{theme.emoji}</span>
-
-            <div className="hero-ring ring-a" />
-            <div className="hero-ring ring-b" />
-          </div>
+        <div className="hero-mark">
+          <Sparkles size={45} />
+          <strong>ADV</strong>
         </div>
       </section>
 
       <section className="stats-grid">
-        <div className="stat-card glass">
-          <div className="stat-icon">
-            <Sparkles size={20} />
-          </div>
+        <article>
+          <BriefcaseBusiness
+            size={20}
+          />
 
-          <div>
-            <span>XP</span>
-            <strong>120</strong>
-          </div>
+          <span>Casos</span>
+          <strong>{cases}</strong>
+        </article>
 
-          <small>+40 esta semana</small>
-        </div>
+        <article>
+          <FileText size={20} />
 
-        <div className="stat-card glass">
-          <div className="stat-icon">
-            <Flame size={20} />
-          </div>
+          <span>Documentos</span>
+          <strong>
+            {documents}
+          </strong>
+        </article>
 
-          <div>
-            <span>Sequência</span>
-            <strong>3 dias</strong>
-          </div>
+        <article>
+          <Bot size={20} />
 
-          <small>Continue assim 🔥</small>
-        </div>
+          <span>
+            Analises solicitadas
+          </span>
 
-        <div className="stat-card glass">
-          <div className="stat-icon">
-            <Trophy size={20} />
-          </div>
+          <strong>
+            {requests}
+          </strong>
+        </article>
 
-          <div>
-            <span>Ranking</span>
-            <strong>#38</strong>
-          </div>
+        <article className="gold-stat">
+          <Plus size={20} />
 
-          <small>Ranking semanal</small>
-        </div>
+          <span>
+            Primeira ferramenta
+          </span>
 
-        <div className="stat-card glass">
-          <div className="stat-icon">
-            <CalendarDays size={20} />
-          </div>
-
-          <div>
-            <span>Atividades</span>
-            <strong>4</strong>
-          </div>
-
-          <small>Pendentes esta semana</small>
-        </div>
+          <strong>
+            Rotativo
+          </strong>
+        </article>
       </section>
 
-      {promosEnabled && (
-        <section className="announcement glass">
-          <div>
-            <span className="new-pill">NOVO</span>
+      <section className="dashboard-grid">
+        <article className="panel">
+          <span className="eyebrow">
+            CALCULADORA EM DESTAQUE
+          </span>
 
-            <strong>
-              Ei, {firstName}! O desafio diário
-              já está disponível.
-            </strong>
+          <h2>
+            Cartão de crédito:
+            rotativo e encargos
+          </h2>
 
-            <p>
-              Cinco perguntas rápidas podem render
-              XP e Level Coins.
-            </p>
-          </div>
+          <p>
+            Lance os valores mês a
+            mês ou importe uma
+            planilha e obtenha uma
+            visão consolidada dos
+            encargos.
+          </p>
 
           <Link
-            to="/app/arena"
-            className="secondary-button"
+            to="/app/calculadoras/bancario/rotativo"
+            className="text-link"
           >
-            Jogar agora
+            Abrir calculadora →
           </Link>
-        </section>
-      )}
+        </article>
 
-      <div className="section-heading">
-        <div>
-          <span>SEU ECOSSISTEMA</span>
-          <h2>O que vamos fazer hoje?</h2>
-        </div>
-      </div>
+        <article className="panel ai-panel">
+          <span className="eyebrow">
+            EM LANÇAMENTO
+          </span>
 
-      <section className="module-grid">
-        {modules.map((module) => {
-          const Icon = module.icon
+          <h2>
+            LEVEL IA
+          </h2>
 
-          return (
-            <Link
-              key={module.title}
-              to={module.path}
-              className={
-                `module-card glass ${module.className}`
-              }
-              onClick={() => playSound('click')}
-            >
-              <div className="module-icon">
-                <Icon size={24} />
-              </div>
+          <p>
+            A inteligência jurídica
+            da LEVEL será usada para
+            auxiliar na leitura,
+            organização e análise de
+            documentos.
+          </p>
 
-              <div>
-                <h3>{module.title}</h3>
-                <p>{module.description}</p>
-              </div>
-
-              <ArrowRight
-                className="module-arrow"
-                size={20}
-              />
-            </Link>
-          )
-        })}
-      </section>
-
-      <section className="progress-panel glass">
-        <div className="section-heading compact">
-          <div>
-            <span>MINHA EVOLUÇÃO</span>
-            <h2>Seu progresso nesta semana</h2>
-          </div>
-
-          <strong>68%</strong>
-        </div>
-
-        <div className="progress-track">
-          <div
-            className="progress-fill"
-            style={{ width: '68%' }}
-          />
-        </div>
-
-        <div className="progress-labels">
-          <span>4 atividades concluídas</span>
-          <span>2 faltando</span>
-        </div>
+          <Link
+            to="/app/ia"
+            className="text-link"
+          >
+            Conhecer LEVEL IA →
+          </Link>
+        </article>
       </section>
     </div>
   )

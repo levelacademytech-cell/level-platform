@@ -1,16 +1,12 @@
-﻿import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabasePublishableKey =
-  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
+const url = import.meta.env.VITE_SUPABASE_URL
+const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
 
-if (!supabaseUrl || !supabasePublishableKey) {
+if (!url || !key) {
   throw new Error(
-    'Supabase não configurado. Verifique VITE_SUPABASE_URL e VITE_SUPABASE_PUBLISHABLE_KEY.'
+    'Supabase nao configurado. Confira o arquivo .env.local.'
   )
 }
 
-export const supabase = createClient(
-  supabaseUrl,
-  supabasePublishableKey
-)
+export const supabase = createClient(url, key)

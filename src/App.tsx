@@ -1,4 +1,8 @@
-import type { ReactNode } from 'react'
+import {
+  Bot,
+  MessageCircle,
+  MessagesSquare,
+} from 'lucide-react'
 
 import {
   BrowserRouter,
@@ -7,459 +11,211 @@ import {
   Routes,
 } from 'react-router-dom'
 
-import { ThemeProvider } from './theme/ThemeContext'
-
 import {
   AuthProvider,
-} from './features/auth/context/AuthContext'
+  useAuth,
+} from './context/AuthContext'
 
 import {
-  ProtectedRoute,
-} from './features/auth/guards/ProtectedRoute'
+  AppLayout,
+} from './layouts/AppLayout'
+
+import {
+  AdminPage,
+} from './pages/AdminPage'
+
+import {
+  BankingPage,
+} from './pages/BankingPage'
+
+import {
+  CalculatorsPage,
+} from './pages/CalculatorsPage'
+
+import {
+  CasesPage,
+} from './pages/CasesPage'
+
+import {
+  DashboardPage,
+} from './pages/DashboardPage'
+
+import {
+  DocumentsPage,
+} from './pages/DocumentsPage'
 
 import {
   LoginPage,
-} from './features/auth/pages/LoginPage'
+} from './pages/LoginPage'
 
 import {
-  RegisterPage,
-} from './features/auth/pages/RegisterPage'
+  ModulePage,
+} from './pages/ModulePage'
 
 import {
-  OnboardingPage,
-} from './features/auth/pages/OnboardingPage'
+  RevolvingCardPage,
+} from './pages/RevolvingCardPage'
 
-import {
-  CourseProvider,
-  useCourses,
-} from './courses/CourseContext'
-
-import {
-  AdminProvider,
-} from './admin/AdminContext'
-
-import {
-  AdminGuard,
-} from './admin/AdminGuard'
-
-import {
-  DirectorLayout,
-} from './admin/DirectorLayout'
-
-import { AppShell } from './layouts/AppShell'
-
-import { DashboardPage } from './pages/DashboardPage'
-import { ModulePage } from './pages/ModulePage'
-import { SettingsPage } from './pages/SettingsPage'
-import { CoursesPage } from './pages/CoursesPage'
-
-import {
-  AdminDashboardPage,
-} from './pages/admin/AdminDashboardPage'
-
-import {
-  AdminUsersPage,
-} from './pages/admin/AdminUsersPage'
-
-import {
-  AdminCoursesPage,
-} from './pages/admin/AdminCoursesPage'
-
-import {
-  AdminCommunicationsPage,
-} from './pages/admin/AdminCommunicationsPage'
-
-import {
-  AdminContentsPage,
-} from './pages/admin/AdminContentsPage'
-
-import {
-  AdminModulePage,
-} from './pages/admin/AdminModulePage'
-
-
-function CourseGate({
-  children,
-}: {
-  children: ReactNode
-}) {
+function ProtectedLayout() {
   const {
-    activeCourse,
+    session,
     loading,
-  } = useCourses()
+  } = useAuth()
 
   if (loading) {
     return (
-      <div className="level-permission-loading">
-        Preparando sua LEVEL...
+      <div className="level-loading">
+        LEVEL ADV
       </div>
     )
   }
 
-  if (!activeCourse) {
+  if (!session) {
     return (
       <Navigate
-        to="/onboarding"
+        to="/login"
         replace
       />
     )
   }
 
-  return children
+  return <AppLayout />
 }
 
-
-function StudentShell({
-  children,
-}: {
-  children: ReactNode
-}) {
+function AppRoutes() {
   return (
-    <ProtectedRoute>
-      <CourseGate>
-        <AppShell>
-          {children}
-        </AppShell>
-      </CourseGate>
-    </ProtectedRoute>
+    <Routes>
+      <Route
+        path="/"
+        element={
+          <Navigate
+            to="/login"
+            replace
+          />
+        }
+      />
+
+      <Route
+        path="/login"
+        element={<LoginPage />}
+      />
+
+      <Route
+        path="/app"
+        element={
+          <ProtectedLayout />
+        }
+      >
+        <Route
+          index
+          element={
+            <DashboardPage />
+          }
+        />
+
+        <Route
+          path="calculadoras"
+          element={
+            <CalculatorsPage />
+          }
+        />
+
+        <Route
+          path="calculadoras/bancario"
+          element={
+            <BankingPage />
+          }
+        />
+
+        <Route
+          path="calculadoras/bancario/rotativo"
+          element={
+            <RevolvingCardPage />
+          }
+        />
+
+        <Route
+          path="casos"
+          element={
+            <CasesPage />
+          }
+        />
+
+        <Route
+          path="documentos"
+          element={
+            <DocumentsPage />
+          }
+        />
+
+        <Route
+          path="ia"
+          element={
+            <ModulePage
+              eyebrow="INTELIGENCIA JURIDICA"
+              title="LEVEL IA"
+              description="Leitura de documentos, organizacao de informacoes e apoio inteligente para a equipe."
+              icon={Bot}
+              beta
+            />
+          }
+        />
+
+        <Route
+          path="chat"
+          element={
+            <ModulePage
+              eyebrow="COMUNICACAO"
+              title="Chat interno"
+              description="Mensagens privadas entre membros da equipe com expiracao operacional em 24 horas."
+              icon={
+                MessageCircle
+              }
+            />
+          }
+        />
+
+        <Route
+          path="forum"
+          element={
+            <ModulePage
+              eyebrow="EQUIPE"
+              title="Forum juridico"
+              description="Espaco permanente para discussoes, duvidas internas e compartilhamento de conhecimento."
+              icon={
+                MessagesSquare
+              }
+            />
+          }
+        />
+
+        <Route
+          path="admin"
+          element={
+            <AdminPage />
+          }
+        />
+      </Route>
+
+      <Route
+        path="*"
+        element={
+          <Navigate
+            to="/app"
+            replace
+          />
+        }
+      />
+    </Routes>
   )
 }
 
-
-function DirectorShell() {
+export default function App() {
   return (
-    <ProtectedRoute>
-      <AdminGuard>
-        <DirectorLayout />
-      </AdminGuard>
-    </ProtectedRoute>
+    <BrowserRouter>
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
+    </BrowserRouter>
   )
 }
-
-
-function App() {
-  return (
-    <ThemeProvider>
-      <BrowserRouter>
-        <AuthProvider>
-          <CourseProvider>
-            <AdminProvider>
-              <Routes>
-
-                <Route
-                  path="/"
-                  element={
-                    <Navigate
-                      to="/login"
-                      replace
-                    />
-                  }
-                />
-
-                <Route
-                  path="/login"
-                  element={<LoginPage />}
-                />
-
-                <Route
-                  path="/cadastro"
-                  element={<RegisterPage />}
-                />
-
-                <Route
-                  path="/onboarding"
-                  element={
-                    <ProtectedRoute>
-                      <OnboardingPage />
-                    </ProtectedRoute>
-                  }
-                />
-
-                <Route
-                  path="/app"
-                  element={
-                    <StudentShell>
-                      <DashboardPage />
-                    </StudentShell>
-                  }
-                />
-
-                <Route
-                  path="/app/cursos"
-                  element={
-                    <StudentShell>
-                      <CoursesPage />
-                    </StudentShell>
-                  }
-                />
-
-                <Route
-                  path="/app/estudar"
-                  element={
-                    <StudentShell>
-                      <ModulePage
-                        eyebrow="LEVEL ACADEMY"
-                        title="Estudar"
-                        description="Trilhas, disciplinas, biblioteca, atividades, flashcards e progresso."
-                      />
-                    </StudentShell>
-                  }
-                />
-
-                <Route
-                  path="/app/arena"
-                  element={
-                    <StudentShell>
-                      <ModulePage
-                        eyebrow="ARENA LEVEL"
-                        title="Jogue, aprenda e suba de nivel."
-                        description="Desafios, ranking, XP e batalhas de conhecimento."
-                      />
-                    </StudentShell>
-                  }
-                />
-
-                <Route
-                  path="/app/carreira"
-                  element={
-                    <StudentShell>
-                      <ModulePage
-                        eyebrow="LEVEL CARREIRA"
-                        title="Carreira"
-                        description="Curriculo, vagas, estagios e empresas parceiras."
-                      />
-                    </StudentShell>
-                  }
-                />
-
-                <Route
-                  path="/app/concursos"
-                  element={
-                    <StudentShell>
-                      <ModulePage
-                        eyebrow="CONCURSOS"
-                        title="Concursos e provas"
-                        description="ENEM, vestibulares, concursos e simulados."
-                      />
-                    </StudentShell>
-                  }
-                />
-
-                <Route
-                  path="/app/comunidade"
-                  element={
-                    <StudentShell>
-                      <ModulePage
-                        eyebrow="COMUNIDADE"
-                        title="Comunidade LEVEL"
-                        description="Foruns, grupos e discussoes."
-                      />
-                    </StudentShell>
-                  }
-                />
-
-                <Route
-                  path="/app/recompensas"
-                  element={
-                    <StudentShell>
-                      <ModulePage
-                        eyebrow="REWARDS"
-                        title="Recompensas"
-                        description="XP, moedas e beneficios."
-                      />
-                    </StudentShell>
-                  }
-                />
-
-                <Route
-                  path="/app/store"
-                  element={
-                    <StudentShell>
-                      <ModulePage
-                        eyebrow="STORE"
-                        title="LEVEL Store"
-                        description="Produtos, livros e materiais."
-                      />
-                    </StudentShell>
-                  }
-                />
-
-                <Route
-                  path="/app/configuracoes"
-                  element={
-                    <StudentShell>
-                      <SettingsPage />
-                    </StudentShell>
-                  }
-                />
-
-
-                <Route
-                  path="/app/controle"
-                  element={<DirectorShell />}
-                >
-                  <Route
-                    index
-                    element={
-                      <AdminDashboardPage />
-                    }
-                  />
-
-                  <Route
-                    path="usuarios"
-                    element={
-                      <AdminUsersPage />
-                    }
-                  />
-
-                  <Route
-                    path="cursos"
-                    element={
-                      <AdminCoursesPage />
-                    }
-                  />
-
-                  <Route
-                    path="comunicacao"
-                    element={
-                      <AdminCommunicationsPage />
-                    }
-                  />
-
-                  <Route
-                    path="conteudos"
-                    element={
-                      <AdminContentsPage />
-                    }
-                  />
-
-                  <Route
-                    path="arena"
-                    element={
-                      <AdminModulePage
-                        eyebrow="GAMIFICACAO"
-                        title="Arena Level"
-                        description="Perguntas, desafios, ranking, XP e moedas."
-                      />
-                    }
-                  />
-
-                  <Route
-                    path="carreira"
-                    element={
-                      <AdminModulePage
-                        eyebrow="CARREIRA"
-                        title="Vagas e empresas"
-                        description="Empresas, vagas, candidatos e processos seletivos."
-                      />
-                    }
-                  />
-
-                  <Route
-                    path="concursos"
-                    element={
-                      <AdminModulePage
-                        eyebrow="OPORTUNIDADES"
-                        title="Concursos e provas"
-                        description="Concursos, ENEM, vestibulares, datas e preparatorios."
-                      />
-                    }
-                  />
-
-                  <Route
-                    path="comunidade"
-                    element={
-                      <AdminModulePage
-                        eyebrow="MODERACAO"
-                        title="Comunidade"
-                        description="Foruns, publicacoes, denuncias e moderacao."
-                      />
-                    }
-                  />
-
-                  <Route
-                    path="store"
-                    element={
-                      <AdminModulePage
-                        eyebrow="COMERCIO"
-                        title="Store e Rewards"
-                        description="Produtos, estoque, recompensas, XP e parceiros."
-                      />
-                    }
-                  />
-
-                  <Route
-                    path="financeiro"
-                    element={
-                      <AdminModulePage
-                        eyebrow="FINANCEIRO"
-                        title="Planos e pagamentos"
-                        description="Planos, assinaturas, compras, pagamentos e historico."
-                      />
-                    }
-                  />
-
-                  <Route
-                    path="aparencia"
-                    element={
-                      <AdminModulePage
-                        eyebrow="DESIGN SYSTEM"
-                        title="Aparencia da plataforma"
-                        description="Cores, banners, fontes, fundos, animacoes e temas por curso."
-                      />
-                    }
-                  />
-
-                  <Route
-                    path="configuracoes"
-                    element={
-                      <AdminModulePage
-                        eyebrow="SISTEMA"
-                        title="Configuracoes gerais"
-                        description="Parametros globais e configuracoes da LEVEL."
-                      />
-                    }
-                  />
-
-                  <Route
-                    path="auditoria"
-                    element={
-                      <AdminModulePage
-                        eyebrow="SEGURANCA"
-                        title="Auditoria e logs"
-                        description="Historico de acoes administrativas e eventos do sistema."
-                      />
-                    }
-                  />
-                </Route>
-
-                <Route
-                  path="/app/admin/*"
-                  element={
-                    <Navigate
-                      to="/app/controle"
-                      replace
-                    />
-                  }
-                />
-
-                <Route
-                  path="*"
-                  element={
-                    <Navigate
-                      to="/app"
-                      replace
-                    />
-                  }
-                />
-
-              </Routes>
-            </AdminProvider>
-          </CourseProvider>
-        </AuthProvider>
-      </BrowserRouter>
-    </ThemeProvider>
-  )
-}
-
-export default App
