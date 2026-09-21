@@ -71,7 +71,7 @@ export function LegalDialog({
 
         <footer>
           <span>
-            VersÃ£o 1.0.0
+            Versão 1.0.0
           </span>
 
           <button

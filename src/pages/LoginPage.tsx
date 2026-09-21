@@ -225,7 +225,7 @@ export function LoginPage() {
 
     if (error) {
       setMessage(
-        'E-mail ou senha invÃ¡lidos.'
+        'E-mail ou senha inválidos.'
       )
 
       return
@@ -272,7 +272,7 @@ export function LoginPage() {
       passwordConfirm
     ) {
       setMessage(
-        'As senhas nÃ£o coincidem.'
+        'As senhas não coincidem.'
       )
 
       return
@@ -284,7 +284,7 @@ export function LoginPage() {
       !thirdPartyAccepted
     ) {
       setMessage(
-        'VocÃª precisa marcar os trÃªs itens obrigatÃ³rios de uso e privacidade.'
+        'Você precisa marcar os três itens obrigatórios de uso e privacidade.'
       )
 
       return
@@ -365,7 +365,7 @@ export function LoginPage() {
     setSuccess(true)
 
     setMessage(
-      'Conta criada. Verifique seu e-mail para confirmar o cadastro e depois faÃ§a login.'
+      'Conta criada. Verifique seu e-mail para confirmar o cadastro e depois faça login.'
     )
   }
 
@@ -413,7 +413,7 @@ export function LoginPage() {
     setSuccess(true)
 
     setMessage(
-      'Se o e-mail estiver cadastrado, vocÃª receberÃ¡ as instruÃ§Ãµes para criar uma nova senha.'
+      'Se o e-mail estiver cadastrado, você receberá as instruções para criar uma nova senha.'
     )
   }
 
@@ -439,7 +439,7 @@ export function LoginPage() {
       passwordConfirm
     ) {
       setMessage(
-        'As senhas nÃ£o coincidem.'
+        'As senhas não coincidem.'
       )
 
       return
@@ -475,7 +475,7 @@ export function LoginPage() {
     setSuccess(true)
 
     setMessage(
-      'Senha atualizada com sucesso. FaÃ§a login com sua nova senha.'
+      'Senha atualizada com sucesso. Faça login com sua nova senha.'
     )
 
     setMode('login')
@@ -502,25 +502,25 @@ export function LoginPage() {
 
         <div className="level-auth-copy">
           <span>
-            AMBIENTE JURÃDICO
+            AMBIENTE JURÍDICO
           </span>
 
           <h1>
-            InteligÃªncia para
-            decisÃµes jurÃ­dicas.
+            Inteligência para
+            decisões jurídicas.
           </h1>
 
           <p>
-            CÃ¡lculos, casos, documentos,
-            colaboraÃ§Ã£o e ferramentas para
-            a rotina do escritÃ³rio em um
-            Ãºnico ambiente.
+            Cálculos, casos, documentos,
+            colaboração e ferramentas para
+            a rotina do escritório em um
+            único ambiente.
           </p>
         </div>
 
         <div className="level-auth-footer">
           LEVEL ADV
-          <span>â€¢</span>
+          <span>•</span>
           Ambiente profissional
         </div>
       </section>
@@ -540,7 +540,7 @@ export function LoginPage() {
 
                 <p>
                   Use seu e-mail e senha
-                  para acessar o escritÃ³rio.
+                  para acessar o escritório.
                 </p>
               </div>
 
@@ -778,7 +778,7 @@ export function LoginPage() {
                           event.target.value
                         )
                       }
-                      placeholder="MÃ­nimo de 8 caracteres"
+                      placeholder="Mínimo de 8 caracteres"
                     />
 
                     <button
@@ -869,7 +869,7 @@ export function LoginPage() {
                           )
                         }
                       >
-                        PolÃ­tica de Privacidade
+                        Política de Privacidade
                       </button>
                       e estou ciente do
                       tratamento de dados.
@@ -889,7 +889,7 @@ export function LoginPage() {
 
                     <span>
                       Declaro possuir fundamento
-                      jurÃ­dico adequado para
+                      jurídico adequado para
                       inserir dados e documentos
                       de terceiros.
                       <button
@@ -900,7 +900,7 @@ export function LoginPage() {
                           )
                         }
                       >
-                        Ver declaraÃ§Ã£o
+                        Ver declaração
                       </button>
                     </span>
                   </label>
@@ -918,7 +918,7 @@ export function LoginPage() {
 
                     <span>
                       Quero receber novidades
-                      e comunicaÃ§Ãµes da LEVEL ADV.
+                      e comunicações da LEVEL ADV.
                       <small>
                         Opcional.
                       </small>
@@ -972,7 +972,7 @@ export function LoginPage() {
 
               <div className="auth-title">
                 <span>
-                  RECUPERAÃ‡ÃƒO
+                  RECUPERAÇÃO
                 </span>
 
                 <h2>
@@ -982,7 +982,7 @@ export function LoginPage() {
                 <p>
                   Informe o e-mail da sua
                   conta para receber o link
-                  de recuperaÃ§Ã£o.
+                  de recuperação.
                 </p>
               </div>
 
@@ -1035,7 +1035,7 @@ export function LoginPage() {
                 >
                   {loading
                     ? 'Enviando...'
-                    : 'Enviar link de recuperaÃ§Ã£o'}
+                    : 'Enviar link de recuperação'}
                 </button>
               </form>
             </>
@@ -1081,7 +1081,7 @@ export function LoginPage() {
                           event.target.value
                         )
                       }
-                      placeholder="MÃ­nimo de 8 caracteres"
+                      placeholder="Mínimo de 8 caracteres"
                     />
                   </div>
                 </label>
@@ -1150,7 +1150,7 @@ export function LoginPage() {
             </button>
 
             <span>
-              LGPD â€¢ v{LEGAL_VERSION}
+              LGPD • v{LEGAL_VERSION}
             </span>
           </div>
         </div>

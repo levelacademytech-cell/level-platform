@@ -149,7 +149,7 @@ export function LegalGate({
       !thirdParty
     ) {
       setMessage(
-        'Marque as trÃªs declaraÃ§Ãµes obrigatÃ³rias para continuar.'
+        'Marque as três declarações obrigatórias para continuar.'
       )
 
       return
@@ -208,13 +208,13 @@ export function LegalGate({
           </span>
 
           <h1>
-            AtualizaÃ§Ã£o de termos
+            Atualização de termos
           </h1>
 
           <p>
             Antes de continuar, revise os
-            documentos aplicÃ¡veis Ã  sua
-            utilizaÃ§Ã£o da LEVEL ADV.
+            documentos aplicáveis à sua
+            utilização da LEVEL ADV.
           </p>
 
           <label>
@@ -264,10 +264,10 @@ export function LegalGate({
                   )
                 }
               >
-                PolÃ­tica de Privacidade
+                Política de Privacidade
               </button>
               e estou ciente das
-              informaÃ§Ãµes sobre o
+              informações sobre o
               tratamento de dados.
             </span>
           </label>
@@ -285,7 +285,7 @@ export function LegalGate({
 
             <span>
               Declaro possuir fundamento
-              jurÃ­dico adequado para
+              jurídico adequado para
               inserir dados e documentos
               de terceiros e observar o
               sigilo profissional.
@@ -297,7 +297,7 @@ export function LegalGate({
                   )
                 }
               >
-                Ler declaraÃ§Ã£o
+                Ler declaração
               </button>
             </span>
           </label>
@@ -319,9 +319,9 @@ export function LegalGate({
           </button>
 
           <small>
-            VersÃ£o {LEGAL_VERSION}.
+            Versão {LEGAL_VERSION}.
             O registro do aceite fica
-            associado Ã  sua conta.
+            associado à sua conta.
           </small>
         </section>
       </div>

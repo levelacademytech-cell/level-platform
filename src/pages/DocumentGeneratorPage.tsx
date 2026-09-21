@@ -77,13 +77,13 @@ type CaseOption = {
 
 const categories = [
   'Todos',
-  'PrevidenciÃ¡rio',
-  'BancÃ¡rio',
-  'CÃ­vel',
+  'Previdenciário',
+  'Bancário',
+  'Cível',
   'Processual',
-  'FamÃ­lia',
-  'TributÃ¡rio',
-  'GestÃ£o',
+  'Família',
+  'Tributário',
+  'Gestão',
   'Geral',
 ]
 
@@ -274,10 +274,7 @@ export function DocumentGeneratorPage() {
       return
     }
 
-    setSavedDocuments(
-      (data ?? [])
-      as SavedDocument[]
-    )
+    setSavedDocuments((data ?? []) as SavedDocument[])
   }
 
   async function loadCases() {
@@ -303,10 +300,7 @@ export function DocumentGeneratorPage() {
       return
     }
 
-    setCases(
-      (data ?? [])
-      as CaseOption[]
-    )
+    setCases((data ?? []) as CaseOption[])
   }
 
   useEffect(() => {
@@ -388,7 +382,7 @@ export function DocumentGeneratorPage() {
 
       if (!template) {
         setMessage(
-          'Modelo nÃ£o encontrado.'
+          'Modelo não encontrado.'
         )
 
         return
@@ -520,7 +514,7 @@ export function DocumentGeneratorPage() {
 
     const confirmed =
       window.confirm(
-        'Restaurar o conteÃºdo original deste modelo?'
+        'Restaurar o conteúdo original deste modelo?'
       )
 
     if (!confirmed) {
@@ -557,7 +551,7 @@ export function DocumentGeneratorPage() {
 
     if (!title.trim()) {
       setMessage(
-        'Informe o tÃ­tulo do documento.'
+        'Informe o título do documento.'
       )
 
       return
@@ -705,7 +699,7 @@ export function DocumentGeneratorPage() {
           template_id:
             currentTemplate.id,
           title:
-            `CÃ³pia - ${title}`,
+            `Cópia - ${title}`,
           client_name:
             clientName.trim() ||
             null,
@@ -895,7 +889,7 @@ export function DocumentGeneratorPage() {
         error
           instanceof Error
           ? error.message
-          : 'NÃ£o foi possÃ­vel gerar o PDF.'
+          : 'Não foi possível gerar o PDF.'
       )
     }
 
@@ -930,7 +924,7 @@ export function DocumentGeneratorPage() {
 
             <p>
               Edite livremente o
-              conteÃºdo, salve no sistema
+              conteúdo, salve no sistema
               e gere o PDF quando quiser.
             </p>
           </div>
@@ -1000,7 +994,7 @@ export function DocumentGeneratorPage() {
           <aside className="docgen-fields">
             <div className="docgen-fields-title">
               <span className="eyebrow">
-                DADOS RÃPIDOS
+                DADOS RÁPIDOS
               </span>
 
               <strong>
@@ -1009,7 +1003,7 @@ export function DocumentGeneratorPage() {
             </div>
 
             <label>
-              TÃ­tulo do arquivo
+              Título do arquivo
 
               <input
                 value={title}
@@ -1047,7 +1041,7 @@ export function DocumentGeneratorPage() {
                 }
               >
                 <option value="">
-                  NÃ£o vincular
+                  Não vincular
                 </option>
 
                 {cases.map(
@@ -1129,7 +1123,7 @@ export function DocumentGeneratorPage() {
                 onClick={() =>
                   command('italic')
                 }
-                title="ItÃ¡lico"
+                title="Itálico"
               >
                 <Italic size={16} />
               </button>
@@ -1290,7 +1284,7 @@ export function DocumentGeneratorPage() {
           </h1>
 
           <p>
-            Modelos jurÃ­dicos editÃ¡veis,
+            Modelos jurídicos editáveis,
             organizados e prontos para
             salvar, revisar e gerar em PDF.
           </p>
@@ -1305,7 +1299,7 @@ export function DocumentGeneratorPage() {
             </strong>
 
             <span>
-              modelos disponÃ­veis
+              modelos disponíveis
             </span>
           </div>
         </div>
@@ -1374,7 +1368,7 @@ export function DocumentGeneratorPage() {
                       .value
                   )
                 }
-                placeholder="Buscar procuraÃ§Ã£o, entrevista, contrato..."
+                placeholder="Buscar procuração, entrevista, contrato..."
               />
             </div>
 
@@ -1490,7 +1484,7 @@ export function DocumentGeneratorPage() {
                   <p>
                     {item.client_name ||
                       'Sem cliente informado'}
-                    {' â€¢ '}
+                    {' • '}
                     Atualizado em
                     {' '}
                     {formatDate(
