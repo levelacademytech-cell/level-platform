@@ -1,10 +1,11 @@
 import {
-  Bot,
   BriefcaseBusiness,
   Calculator,
+  ChevronLeft,
+  ChevronRight,
+  FileSignature,
   FileText,
   Plus,
-  Sparkles,
 } from 'lucide-react'
 
 import {
@@ -20,15 +21,39 @@ import {
   supabase,
 } from '../lib/supabase'
 
+type BannerRow = {
+  id: string
+  title: string
+  image_url: string
+  link_url: string | null
+  sort_order: number
+}
+
 export function DashboardPage() {
-  const [cases, setCases] =
-    useState(0)
+  const [
+    cases,
+    setCases,
+  ] = useState(0)
 
-  const [documents, setDocuments] =
-    useState(0)
+  const [
+    documents,
+    setDocuments,
+  ] = useState(0)
 
-  const [requests, setRequests] =
-    useState(0)
+  const [
+    requests,
+    setRequests,
+  ] = useState(0)
+
+  const [
+    banners,
+    setBanners,
+  ] = useState<BannerRow[]>([])
+
+  const [
+    activeBanner,
+    setActiveBanner,
+  ] = useState(0)
 
   useEffect(() => {
     void Promise.all([
@@ -63,11 +88,28 @@ export function DashboardPage() {
             head: true,
           }
         ),
+
+      supabase
+        .from('adv_banners')
+        .select(
+          'id,title,image_url,link_url,sort_order'
+        )
+        .eq(
+          'is_active',
+          true
+        )
+        .order(
+          'sort_order',
+          {
+            ascending: true,
+          }
+        ),
     ]).then(
       ([
         caseResult,
         documentResult,
         requestResult,
+        bannerResult,
       ]) => {
         setCases(
           caseResult.count ?? 0
@@ -80,53 +122,211 @@ export function DashboardPage() {
         setRequests(
           requestResult.count ?? 0
         )
+
+        if (!bannerResult.error) {
+          setBanners((bannerResult.data ?? []) as BannerRow[])
+        }
       }
     )
   }, [])
 
+  useEffect(() => {
+    if (
+      banners.length <= 1
+    ) {
+      return
+    }
+
+    const timer =
+      window.setInterval(
+        () => {
+          setActiveBanner(
+            (current) =>
+              (
+                current + 1
+              ) %
+              banners.length
+          )
+        },
+        7000
+      )
+
+    return () =>
+      window.clearInterval(
+        timer
+      )
+  }, [banners.length])
+
+  useEffect(() => {
+    if (
+      activeBanner >=
+      banners.length
+    ) {
+      setActiveBanner(0)
+    }
+  }, [
+    activeBanner,
+    banners.length,
+  ])
+
+  function previousBanner() {
+    if (
+      banners.length === 0
+    ) {
+      return
+    }
+
+    setActiveBanner(
+      (current) =>
+        (
+          current -
+          1 +
+          banners.length
+        ) %
+        banners.length
+    )
+  }
+
+  function nextBanner() {
+    if (
+      banners.length === 0
+    ) {
+      return
+    }
+
+    setActiveBanner(
+      (current) =>
+        (
+          current + 1
+        ) %
+        banners.length
+    )
+  }
+
+  const banner =
+    banners[
+      activeBanner
+    ]
+
   return (
     <div className="page">
-      <section className="hero-panel">
-        <div>
-          <span className="eyebrow">
-            LEVEL ADV
-          </span>
+      {banner && (
+        <section className="adv-banner-carousel">
+          {banner.link_url ? (
+            banner.link_url
+              .startsWith('/') ? (
+              <Link
+                className="adv-banner-link"
+                to={
+                  banner.link_url
+                }
+                aria-label={
+                  banner.title
+                }
+              >
+                <img
+                  src={
+                    banner.image_url
+                  }
+                  alt={
+                    banner.title
+                  }
+                />
+              </Link>
+            ) : (
+              <a
+                className="adv-banner-link"
+                href={
+                  banner.link_url
+                }
+                target="_blank"
+                rel="noreferrer"
+                aria-label={
+                  banner.title
+                }
+              >
+                <img
+                  src={
+                    banner.image_url
+                  }
+                  alt={
+                    banner.title
+                  }
+                />
+              </a>
+            )
+          ) : (
+            <img
+              src={
+                banner.image_url
+              }
+              alt={
+                banner.title
+              }
+            />
+          )}
 
-          <h1>
-            Seu centro de
-            inteligência jurídica.
-          </h1>
+          {banners.length > 1 && (
+            <>
+              <button
+                type="button"
+                className="banner-arrow previous"
+                onClick={
+                  previousBanner
+                }
+                aria-label="Banner anterior"
+              >
+                <ChevronLeft
+                  size={20}
+                />
+              </button>
 
-          <p>
-            Calcule, organize casos,
-            analise documentos e
-            centralize ferramentas
-            para sua equipe.
-          </p>
+              <button
+                type="button"
+                className="banner-arrow next"
+                onClick={
+                  nextBanner
+                }
+                aria-label="PrÃ³ximo banner"
+              >
+                <ChevronRight
+                  size={20}
+                />
+              </button>
 
-          <div className="hero-actions">
-            <Link
-              className="primary-button"
-              to="/app/calculadoras/bancario/rotativo"
-            >
-              <Calculator size={17} />
-              Nova análise
-            </Link>
-
-            <Link
-              className="secondary-button"
-              to="/app/calculadoras"
-            >
-              Ver calculadoras
-            </Link>
-          </div>
-        </div>
-
-        <div className="hero-mark">
-          <Sparkles size={45} />
-          <strong>ADV</strong>
-        </div>
-      </section>
+              <div className="banner-dots">
+                {banners.map(
+                  (
+                    item,
+                    index
+                  ) => (
+                    <button
+                      key={
+                        item.id
+                      }
+                      type="button"
+                      className={
+                        index ===
+                        activeBanner
+                          ? 'active'
+                          : ''
+                      }
+                      onClick={() =>
+                        setActiveBanner(
+                          index
+                        )
+                      }
+                      aria-label={
+                        `Abrir banner ${index + 1}`
+                      }
+                    />
+                  )
+                )}
+              </div>
+            </>
+          )}
+        </section>
+      )}
 
       <section className="stats-grid">
         <article>
@@ -148,10 +348,10 @@ export function DashboardPage() {
         </article>
 
         <article>
-          <Bot size={20} />
+          <Calculator size={20} />
 
           <span>
-            Analises solicitadas
+            AnÃ¡lises solicitadas
           </span>
 
           <strong>
@@ -163,11 +363,11 @@ export function DashboardPage() {
           <Plus size={20} />
 
           <span>
-            Primeira ferramenta
+            Ferramentas LEVEL
           </span>
 
           <strong>
-            Rotativo
+            ADV
           </strong>
         </article>
       </section>
@@ -175,53 +375,99 @@ export function DashboardPage() {
       <section className="dashboard-grid">
         <article className="panel">
           <span className="eyebrow">
-            CALCULADORA EM DESTAQUE
+            CALCULADORAS
           </span>
 
           <h2>
-            Cartão de crédito:
-            rotativo e encargos
+            Ferramentas jurÃ­dicas
+            em um sÃ³ ambiente
           </h2>
 
           <p>
-            Lance os valores mês a
-            mês ou importe uma
-            planilha e obtenha uma
-            visão consolidada dos
-            encargos.
+            Acesse calculadoras bancÃ¡rias,
+            trabalhistas, tributÃ¡rias,
+            previdenciÃ¡rias e outras
+            ferramentas de apoio.
           </p>
 
           <Link
-            to="/app/calculadoras/bancario/rotativo"
+            to="/app/calculadoras"
             className="text-link"
           >
-            Abrir calculadora →
+            Abrir calculadoras â†’
           </Link>
         </article>
 
-        <article className="panel ai-panel">
+        <article className="panel">
           <span className="eyebrow">
-            EM LANÇAMENTO
+            DOCUMENTOS
           </span>
 
           <h2>
-            LEVEL IA
+            Modelos prontos
+            para editar
           </h2>
 
           <p>
-            A inteligência jurídica
-            da LEVEL será usada para
-            auxiliar na leitura,
-            organização e análise de
-            documentos.
+            Use os geradores jurÃ­dicos,
+            salve seus documentos e
+            gere PDFs diretamente
+            pela plataforma.
           </p>
 
           <Link
-            to="/app/ia"
+            to="/app/gerador-documentos"
             className="text-link"
           >
-            Conhecer LEVEL IA →
+            Abrir gerador â†’
           </Link>
+        </article>
+
+        <article className="panel">
+          <span className="eyebrow">
+            CASOS
+          </span>
+
+          <h2>
+            Organize o histÃ³rico
+            dos seus clientes
+          </h2>
+
+          <p>
+            Centralize cÃ¡lculos,
+            documentos, contribuiÃ§Ãµes
+            e andamento dos casos.
+          </p>
+
+          <Link
+            to="/app/casos"
+            className="text-link"
+          >
+            Abrir casos â†’
+          </Link>
+        </article>
+
+        <article className="panel">
+          <span className="eyebrow">
+            LEVEL ADV
+          </span>
+
+          <h2>
+            Uma empresa
+            Ludo Digital MKT
+          </h2>
+
+          <p>
+            Tecnologia criada para
+            apoiar a rotina jurÃ­dica,
+            centralizar ferramentas e
+            melhorar a produtividade
+            das equipes.
+          </p>
+
+          <FileSignature
+            size={28}
+          />
         </article>
       </section>
     </div>

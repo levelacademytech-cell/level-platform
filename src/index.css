@@ -8920,3 +8920,287 @@ label {
     padding: 35px 25px;
   }
 }
+
+
+/* ============================================================
+   LEVEL ADV V12 - BRANDING + BANNERS
+   ============================================================ */
+
+.adv-brand {
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+.adv-brand-logo {
+  width: 43px;
+  height: 43px;
+  flex: 0 0 auto;
+  object-fit: cover;
+  border-radius: 9px;
+  border: 1px solid #dfe4e8;
+  background: #fff;
+}
+
+.adv-brand-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.adv-brand-wordmark {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.adv-brand-wordmark strong {
+  color: #171a20;
+  font-size: 17px !important;
+  letter-spacing: .14em !important;
+}
+
+.adv-brand-wordmark span {
+  color: var(--accent) !important;
+  font-size: 7px !important;
+}
+
+.adv-brand-company {
+  color: #9098a3;
+  font-size: 6px;
+  line-height: 1.25;
+  letter-spacing: .02em;
+}
+
+.level-auth-brand {
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+.level-auth-brand > img {
+  width: 58px;
+  height: 58px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid #dde2e7;
+  background: #fff;
+}
+
+.level-auth-brand > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.level-auth-brand .brand-line {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.level-auth-brand small {
+  color: #818995;
+  font-size: 8px;
+  letter-spacing: .03em;
+}
+
+/* CAROUSEL */
+
+.adv-banner-carousel {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  margin-bottom: 12px;
+  border: 1px solid #e0e5ea;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow:
+    0 12px 35px
+    rgba(24, 36, 48, .06);
+  aspect-ratio: 16 / 9;
+}
+
+.adv-banner-link {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.adv-banner-carousel > img,
+.adv-banner-link > img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.banner-arrow {
+  width: 42px;
+  height: 42px;
+  position: absolute;
+  top: 50%;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  transform: translateY(-50%);
+  border: 1px solid
+    rgba(255,255,255,.7);
+  border-radius: 50%;
+  color: #fff;
+  background:
+    rgba(15, 35, 30, .63);
+  backdrop-filter: blur(8px);
+  box-shadow:
+    0 6px 20px
+    rgba(0,0,0,.12);
+}
+
+.banner-arrow.previous {
+  left: 15px;
+}
+
+.banner-arrow.next {
+  right: 15px;
+}
+
+.banner-dots {
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  z-index: 5;
+  display: flex;
+  gap: 7px;
+  transform: translateX(-50%);
+  padding: 7px 9px;
+  border-radius: 100px;
+  background:
+    rgba(255,255,255,.78);
+  backdrop-filter: blur(8px);
+}
+
+.banner-dots button {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #bec5cc;
+}
+
+.banner-dots button.active {
+  width: 22px;
+  border-radius: 100px;
+  background: var(--accent);
+}
+
+/* BANNER ADMIN */
+
+.banner-create-panel {
+  margin-bottom: 12px;
+}
+
+.banner-admin-form {
+  display: grid;
+  grid-template-columns:
+    1.2fr 1.2fr .45fr;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.banner-upload-field {
+  grid-column: 1 / -1;
+  min-height: 120px;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 5px !important;
+  padding: 20px;
+  border: 1px dashed
+    color-mix(
+      in srgb,
+      var(--accent) 35%,
+      #cfd5db
+    );
+  border-radius: 10px;
+  color: #56606c !important;
+  background:
+    color-mix(
+      in srgb,
+      var(--accent) 3%,
+      white
+    );
+  cursor: pointer;
+}
+
+.banner-upload-field svg {
+  color: var(--accent);
+}
+
+.banner-upload-field span {
+  color: #8a939e;
+  font-size: 8px;
+}
+
+.banner-upload-field input {
+  display: none;
+}
+
+.banner-admin-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.banner-admin-card {
+  display: grid;
+  grid-template-columns:
+    minmax(250px, 420px)
+    minmax(0, 1fr);
+  gap: 15px;
+  padding: 12px;
+  border: 1px solid #e0e5ea;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.banner-admin-card > img {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #e5e8ec;
+}
+
+.banner-admin-card-body {
+  min-width: 0;
+  display: grid;
+  grid-template-columns:
+    1fr 1fr 120px;
+  align-content: start;
+  gap: 9px;
+}
+
+.banner-admin-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 3px;
+}
+
+@media (max-width: 900px) {
+  .banner-admin-form,
+  .banner-admin-card,
+  .banner-admin-card-body {
+    grid-template-columns: 1fr;
+  }
+
+  .banner-upload-field,
+  .banner-admin-actions {
+    grid-column: 1;
+  }
+
+  .adv-banner-carousel {
+    border-radius: 9px;
+  }
+}

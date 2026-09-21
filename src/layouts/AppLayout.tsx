@@ -4,6 +4,7 @@ import {
   Check,
   FileSignature,
   FileText,
+  ImagePlus,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -332,6 +333,23 @@ export function AppLayout() {
 
                 <span>
                   Painel administrador
+                </span>
+              </NavLink>
+              <NavLink
+                to="/app/admin/banners"
+                onClick={() =>
+                  setMobileOpen(false)
+                }
+                className={({ isActive }) =>
+                  isActive
+                    ? 'nav-item active'
+                    : 'nav-item'
+                }
+              >
+                <ImagePlus size={18} />
+
+                <span>
+                  Banners e anúncios
                 </span>
               </NavLink>
             </>

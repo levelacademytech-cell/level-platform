@@ -21,6 +21,9 @@ import {
 import {
   AdminPage,
 } from './pages/AdminPage'
+import {
+  BannerAdminPage,
+} from './pages/BannerAdminPage'
 
 import {
   CalculatorCategoryPage,
@@ -235,6 +238,12 @@ function AppRoutes() {
           path="admin"
           element={
             <AdminPage />
+          }
+        />
+        <Route
+          path="admin/banners"
+          element={
+            <BannerAdminPage />
           }
         />
       </Route>
