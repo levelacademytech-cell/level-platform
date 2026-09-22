@@ -95,7 +95,7 @@ const statusLabels: Record<string, string> = {
   pending: 'Pendente',
   suspended: 'Suspenso',
   banned: 'Bloqueado',
-  deleted: 'ExcluÃ­do',
+  deleted: 'Excluído',
 }
 
 function formatDate(
@@ -134,7 +134,7 @@ function activityLabel(
   if (
     value === 'page_view'
   ) {
-    return 'PÃ¡gina acessada'
+    return 'Página acessada'
   }
 
   if (
@@ -428,7 +428,7 @@ export function AdminPage() {
     target: AdminUser
   ) {
     setMessage(
-      'Enviando recuperaÃ§Ã£o de senha...'
+      'Enviando recuperação de senha...'
     )
 
     const {
@@ -446,7 +446,7 @@ export function AdminPage() {
     setMessage(
       error
         ? error.message
-        : `Link de recuperaÃ§Ã£o enviado para ${target.email}.`
+        : `Link de recuperação enviado para ${target.email}.`
     )
   }
 
@@ -460,7 +460,7 @@ export function AdminPage() {
 
     const password =
       window.prompt(
-        `Defina uma senha temporÃ¡ria para ${target.display_name}. O usuÃ¡rio deve trocÃ¡-la depois.`,
+        `Defina uma senha temporária para ${target.display_name}. O usuário deve trocá-la depois.`,
         suggestion
       )
 
@@ -474,13 +474,13 @@ export function AdminPage() {
       password.length < 8
     ) {
       setMessage(
-        'A senha temporÃ¡ria precisa ter pelo menos 8 caracteres.'
+        'A senha temporária precisa ter pelo menos 8 caracteres.'
       )
       return
     }
 
     setMessage(
-      'Alterando senha temporÃ¡ria...'
+      'Alterando senha temporária...'
     )
 
     const {
@@ -520,7 +520,7 @@ export function AdminPage() {
     }
 
     setMessage(
-      `Senha temporÃ¡ria definida para ${target.email}.`
+      `Senha temporária definida para ${target.email}.`
     )
   }
 
@@ -610,7 +610,7 @@ export function AdminPage() {
             user.id,
 
           admin_note:
-            'ExclusÃ£o aprovada pelo administrador.',
+            'Exclusão aprovada pelo administrador.',
         })
         .eq(
           'id',
@@ -625,7 +625,7 @@ export function AdminPage() {
     }
 
     setMessage(
-      'Documento excluÃ­do definitivamente.'
+      'Documento excluído definitivamente.'
     )
 
     await load()
@@ -641,7 +641,7 @@ export function AdminPage() {
     const note =
       window.prompt(
         'Motivo da recusa:',
-        'Documento mantido pela administraÃ§Ã£o.'
+        'Documento mantido pela administração.'
       )
 
     if (
@@ -685,7 +685,7 @@ export function AdminPage() {
     }
 
     setMessage(
-      'SolicitaÃ§Ã£o recusada.'
+      'Solicitação recusada.'
     )
 
     await load()
@@ -712,7 +712,7 @@ export function AdminPage() {
       <div className="page-heading admin-heading-row">
         <div>
           <span className="eyebrow">
-            ADMINISTRAÃ‡ÃƒO
+            ADMINISTRAÇÃO
           </span>
 
           <h1>
@@ -720,9 +720,9 @@ export function AdminPage() {
           </h1>
 
           <p>
-            UsuÃ¡rios, acessos,
-            atividade, solicitaÃ§Ãµes,
-            marca e seguranÃ§a da
+            Usuários, acessos,
+            atividade, solicitações,
+            marca e segurança da
             plataforma.
           </p>
         </div>
@@ -765,7 +765,7 @@ export function AdminPage() {
             )
           }
         >
-          VisÃ£o geral
+          Visão geral
         </button>
 
         <button
@@ -780,7 +780,7 @@ export function AdminPage() {
             )
           }
         >
-          UsuÃ¡rios
+          Usuários
         </button>
 
         <button
@@ -812,7 +812,7 @@ export function AdminPage() {
             )
           }
         >
-          SolicitaÃ§Ãµes
+          Solicitações
         </button>
 
         <button
@@ -844,7 +844,7 @@ export function AdminPage() {
             )
           }
         >
-          SeguranÃ§a
+          Segurança
         </button>
       </div>
 
@@ -858,7 +858,7 @@ export function AdminPage() {
               />
 
               <span>
-                USUÃRIOS
+                USUÁRIOS
               </span>
 
               <strong>
@@ -886,7 +886,7 @@ export function AdminPage() {
               />
 
               <span>
-                ANÃLISES
+                ANÁLISES
               </span>
 
               <strong>
@@ -903,7 +903,7 @@ export function AdminPage() {
               />
 
               <span>
-                EXCLUSÃ•ES
+                EXCLUSÕES
               </span>
 
               <strong>
@@ -923,7 +923,7 @@ export function AdminPage() {
                 </span>
 
                 <h2>
-                  UsuÃ¡rios recentes
+                  Usuários recentes
                 </h2>
               </div>
             </div>
@@ -989,7 +989,7 @@ export function AdminPage() {
           <div className="panel-heading">
             <div>
               <span className="eyebrow">
-                USUÃRIOS E ACESSOS
+                USUÁRIOS E ACESSOS
               </span>
 
               <h2>
@@ -1000,7 +1000,7 @@ export function AdminPage() {
                 Consulte atividade,
                 recupere acesso e
                 bloqueie contas quando
-                necessÃ¡rio.
+                necessário.
               </p>
             </div>
           </div>
@@ -1019,7 +1019,7 @@ export function AdminPage() {
                     .value
                 )
               }
-              placeholder="Buscar por nome, e-mail, usuÃ¡rio, OAB ou escritÃ³rio..."
+              placeholder="Buscar por nome, e-mail, usuário, OAB ou escritório..."
             />
           </div>
 
@@ -1095,7 +1095,7 @@ export function AdminPage() {
 
                   <div className="admin-user-details">
                     <span>
-                      Ãšltimo acesso:
+                      Último acesso:
                       <strong>
                         {' '}
                         {formatDate(
@@ -1106,7 +1106,7 @@ export function AdminPage() {
                     </span>
 
                     <span>
-                      Ãšltima pÃ¡gina:
+                      Última página:
                       <strong>
                         {' '}
                         {item.last_path ||
@@ -1119,16 +1119,16 @@ export function AdminPage() {
                       <strong>
                         {' '}
                         {item.oab_number ||
-                          'NÃ£o informada'}
+                          'Não informada'}
                       </strong>
                     </span>
 
                     <span>
-                      EscritÃ³rio:
+                      Escritório:
                       <strong>
                         {' '}
                         {item.law_firm ||
-                          'NÃ£o informado'}
+                          'Não informado'}
                       </strong>
                     </span>
                   </div>
@@ -1147,7 +1147,7 @@ export function AdminPage() {
                         size={14}
                       />
 
-                      Enviar recuperaÃ§Ã£o
+                      Enviar recuperação
                     </button>
 
                     <button
@@ -1163,7 +1163,7 @@ export function AdminPage() {
                         size={14}
                       />
 
-                      Senha temporÃ¡ria
+                      Senha temporária
                     </button>
 
                     {item.account_status !==
@@ -1247,10 +1247,10 @@ export function AdminPage() {
               </h2>
 
               <p>
-                Registro de pÃ¡ginas e
-                aÃ§Ãµes operacionais. O
-                conteÃºdo de conversas
-                privadas nÃ£o Ã© exibido.
+                Registro de páginas e
+                ações operacionais. O
+                conteúdo de conversas
+                privadas não é exibido.
               </p>
             </div>
           </div>
@@ -1281,7 +1281,7 @@ export function AdminPage() {
                         )
                       }
                       {item.path
-                        ? ` â€¢ ${item.path}`
+                        ? ` • ${item.path}`
                         : ''}
                     </span>
 
@@ -1315,7 +1315,7 @@ export function AdminPage() {
                 </span>
 
                 <h2>
-                  SolicitaÃ§Ãµes de exclusÃ£o
+                  Solicitações de exclusão
                 </h2>
               </div>
             </div>
@@ -1323,7 +1323,7 @@ export function AdminPage() {
             {deletionRequests.length ===
               0 && (
               <div className="empty-state compact">
-                Nenhuma solicitaÃ§Ã£o pendente.
+                Nenhuma solicitação pendente.
               </div>
             )}
 
@@ -1340,7 +1340,7 @@ export function AdminPage() {
                   >
                     <div>
                       <span className="case-type">
-                        EXCLUSÃƒO DE DOCUMENTO
+                        EXCLUSÃO DE DOCUMENTO
                       </span>
 
                       <strong>
@@ -1404,11 +1404,11 @@ export function AdminPage() {
             <div className="panel-heading">
               <div>
                 <span className="eyebrow">
-                  ANÃLISES
+                  ANÁLISES
                 </span>
 
                 <h2>
-                  SolicitaÃ§Ãµes recentes
+                  Solicitações recentes
                 </h2>
               </div>
             </div>
@@ -1462,7 +1462,7 @@ export function AdminPage() {
             />
 
             <span>
-              MARCA E CONTEÃšDO
+              MARCA E CONTEÚDO
             </span>
 
             <strong>
@@ -1487,15 +1487,15 @@ export function AdminPage() {
             </span>
 
             <strong>
-              FÃ³rmulas protegidas
+              Fórmulas protegidas
             </strong>
 
             <p>
               Para evitar resultados
-              jurÃ­dicos ou financeiros
-              incorretos, as fÃ³rmulas
+              jurídicos ou financeiros
+              incorretos, as fórmulas
               permanecem versionadas no
-              cÃ³digo.
+              código.
             </p>
           </article>
 
@@ -1509,15 +1509,15 @@ export function AdminPage() {
             </span>
 
             <strong>
-              Modelos jurÃ­dicos
+              Modelos jurídicos
             </strong>
 
             <p>
               Os modelos atuais ficam
-              versionados no cÃ³digo.
-              A ediÃ§Ã£o administrativa
-              completa poderÃ¡ ser
-              liberada em uma prÃ³xima
+              versionados no código.
+              A edição administrativa
+              completa poderá ser
+              liberada em uma próxima
               etapa.
             </p>
           </article>
@@ -1538,8 +1538,8 @@ export function AdminPage() {
             <p>
               Estrutura reservada para
               assinatura, pagamento e
-              liberaÃ§Ã£o de recursos de
-              inteligÃªncia artificial.
+              liberação de recursos de
+              inteligência artificial.
             </p>
           </article>
         </div>
@@ -1558,15 +1558,15 @@ export function AdminPage() {
             </span>
 
             <h2>
-              Dados por usuÃ¡rio
+              Dados por usuário
             </h2>
 
             <p>
-              Casos e documentos sÃ£o
-              isolados por polÃ­ticas
-              RLS. Outros advogados sÃ³
+              Casos e documentos são
+              isolados por políticas
+              RLS. Outros advogados só
               acessam um caso quando
-              recebem autorizaÃ§Ã£o de
+              recebem autorização de
               compartilhamento.
             </p>
           </article>
@@ -1577,7 +1577,7 @@ export function AdminPage() {
             />
 
             <span className="eyebrow">
-              ADMINISTRAÃ‡ÃƒO
+              ADMINISTRAÇÃO
             </span>
 
             <h2>
@@ -1603,15 +1603,15 @@ export function AdminPage() {
             </span>
 
             <h2>
-              PresenÃ§a e navegaÃ§Ã£o
+              Presença e navegação
             </h2>
 
             <p>
               A plataforma registra
-              pÃ¡ginas acessadas e
-              presenÃ§a operacional por
-              atÃ© 180 dias, sem exibir
-              conteÃºdo de chat privado.
+              páginas acessadas e
+              presença operacional por
+              até 180 dias, sem exibir
+              conteúdo de chat privado.
             </p>
           </article>
 

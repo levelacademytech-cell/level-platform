@@ -42,7 +42,7 @@ import {
 const mainItems = [
   {
     to: '/app',
-    label: 'InÃ­cio',
+    label: 'Início',
     icon: LayoutDashboard,
     end: true,
   },
@@ -73,7 +73,7 @@ const mainItems = [
   },
   {
     to: '/app/forum',
-    label: 'FÃ³rum',
+    label: 'Fórum',
     icon: MessagesSquare,
   },
 ]
@@ -146,7 +146,7 @@ export function AppLayout() {
       ?.display_name ??
     user?.email
       ?.split('@')[0] ??
-    'UsuÃ¡rio'
+    'Usuário'
 
   function applyColor(
     color: string
@@ -348,16 +348,16 @@ export function AppLayout() {
           </span>
 
           <strong>
-            LEVEL JurÃ­dico
+            LEVEL Jurídico
           </strong>
 
           <small>
-            EscritÃ³rio principal
+            Escritório principal
           </small>
         </div>
 
         <div className="nav-label">
-          NAVEGAÃ‡ÃƒO
+          NAVEGAÇÃO
         </div>
 
         <nav>
@@ -399,7 +399,7 @@ export function AppLayout() {
           {isAdmin && (
             <>
               <div className="nav-label second">
-                ADMINISTRAÃ‡ÃƒO
+                ADMINISTRAÇÃO
               </div>
 
               <NavLink
@@ -510,7 +510,7 @@ export function AppLayout() {
               </span>
 
               <strong>
-                Ambiente jurÃ­dico
+                Ambiente jurídico
               </strong>
             </div>
           </div>
@@ -528,7 +528,7 @@ export function AppLayout() {
                       !current
                   )
                 }
-                title="Personalizar aparÃªncia"
+                title="Personalizar aparência"
               >
                 <Palette
                   size={18}
@@ -548,7 +548,7 @@ export function AppLayout() {
                   <div className="appearance-title">
                     <div>
                       <span>
-                        APARÃŠNCIA
+                        APARÊNCIA
                       </span>
 
                       <strong>
@@ -562,8 +562,8 @@ export function AppLayout() {
                   </div>
 
                   <p>
-                    Escolha a cor dos botÃµes,
-                    Ã­cones e detalhes da sua
+                    Escolha a cor dos botões,
+                    ícones e detalhes da sua
                     plataforma.
                   </p>
 

@@ -60,7 +60,7 @@ Deno.serve(
         return json(
           {
             error:
-              'SessÃ£o nÃ£o informada.',
+              'Sessão não informada.',
           },
           401
         )
@@ -89,7 +89,7 @@ Deno.serve(
         return json(
           {
             error:
-              'Servidor nÃ£o configurado.',
+              'Servidor não configurado.',
           },
           500
         )
@@ -129,7 +129,7 @@ Deno.serve(
         return json(
           {
             error:
-              'SessÃ£o invÃ¡lida.',
+              'Sessão inválida.',
           },
           401
         )
@@ -209,7 +209,7 @@ Deno.serve(
         return json(
           {
             error:
-              'Acesso administrativo necessÃ¡rio.',
+              'Acesso administrativo necessário.',
           },
           403
         )
@@ -241,7 +241,7 @@ Deno.serve(
           return json(
             {
               error:
-                'UsuÃ¡rio ou senha temporÃ¡ria invÃ¡lidos.',
+                'Usuário ou senha temporária inválidos.',
             },
             400
           )
@@ -308,7 +308,7 @@ Deno.serve(
       return json(
         {
           error:
-            'AÃ§Ã£o administrativa desconhecida.',
+            'Ação administrativa desconhecida.',
         },
         400
       )

@@ -237,7 +237,7 @@ export function BannerAdminPage() {
         )
     ) {
       setMessage(
-        'Selecione uma imagem vÃ¡lida.'
+        'Selecione uma imagem válida.'
       )
 
       event.target.value =
@@ -251,7 +251,7 @@ export function BannerAdminPage() {
       8 * 1024 * 1024
     ) {
       setMessage(
-        'A imagem deve ter no mÃ¡ximo 8 MB.'
+        'A imagem deve ter no máximo 8 MB.'
       )
 
       event.target.value =
@@ -413,7 +413,7 @@ export function BannerAdminPage() {
       !title.trim()
     ) {
       setMessage(
-        'Informe o tÃ­tulo e selecione a imagem.'
+        'Informe o título e selecione a imagem.'
       )
       return
     }
@@ -707,7 +707,7 @@ export function BannerAdminPage() {
     }
 
     setMessage(
-      'Banner excluÃ­do.'
+      'Banner excluído.'
     )
 
     await load()
@@ -727,7 +727,7 @@ export function BannerAdminPage() {
     <div className="page banner-admin-page">
       <div className="page-heading">
         <span className="eyebrow">
-          ADMINISTRAÃ‡ÃƒO
+          ADMINISTRAÇÃO
         </span>
 
         <h1>
@@ -735,7 +735,7 @@ export function BannerAdminPage() {
         </h1>
 
         <p>
-          Controle os anÃºncios e
+          Controle os anúncios e
           a identidade visual da
           LEVEL ADV.
         </p>
@@ -759,13 +759,13 @@ export function BannerAdminPage() {
             </h2>
 
             <p>
-              A logo Ã© usada dentro
+              A logo é usada dentro
               da plataforma. O favicon
               aparece na aba do
               navegador. A imagem de
-              compartilhamento Ã© usada
+              compartilhamento é usada
               pela interface e como
-              referÃªncia para links.
+              referência para links.
             </p>
           </div>
 
@@ -841,7 +841,7 @@ export function BannerAdminPage() {
               </strong>
 
               <span>
-                Ãcone pequeno da aba
+                Ícone pequeno da aba
                 do navegador.
               </span>
             </div>
@@ -895,9 +895,9 @@ export function BannerAdminPage() {
 
               <span>
                 Recomendado:
-                1200 Ã— 630.
+                1200 × 630.
                 Alguns aplicativos
-                mantÃªm cache da
+                mantêm cache da
                 imagem anterior.
               </span>
             </div>
@@ -941,7 +941,7 @@ export function BannerAdminPage() {
 
         <div className="brand-company-row">
           <label>
-            Empresa responsÃ¡vel
+            Empresa responsável
 
             <input
               value={
@@ -975,9 +975,9 @@ export function BannerAdminPage() {
         </div>
 
         <small className="brand-note">
-          O Ã­cone instalado como aplicativo
-          usa tambÃ©m os arquivos PWA
-          empacotados nesta versÃ£o da LEVEL.
+          O ícone instalado como aplicativo
+          usa também os arquivos PWA
+          empacotados nesta versão da LEVEL.
         </small>
       </section>
 
@@ -994,8 +994,8 @@ export function BannerAdminPage() {
 
             <p>
               Recomendado:
-              1600 Ã— 900 ou
-              1920 Ã— 1080,
+              1600 × 900 ou
+              1920 × 1080,
               formato 16:9,
               PNG/JPG/WEBP.
             </p>
@@ -1008,7 +1008,7 @@ export function BannerAdminPage() {
 
         <div className="banner-admin-form">
           <label>
-            TÃ­tulo interno
+            Título interno
 
             <input
               value={title}
@@ -1021,7 +1021,7 @@ export function BannerAdminPage() {
                     .value
                 )
               }
-              placeholder="Ex.: Calculadoras jurÃ­dicas"
+              placeholder="Ex.: Calculadoras jurídicas"
             />
           </label>
 
@@ -1079,7 +1079,7 @@ export function BannerAdminPage() {
             <span>
               {file
                 ? file.name
-                : 'PNG, JPG ou WEBP â€¢ atÃ© 8 MB'}
+                : 'PNG, JPG ou WEBP • até 8 MB'}
             </span>
 
             <input
@@ -1134,7 +1134,7 @@ export function BannerAdminPage() {
 
               <div className="banner-admin-card-body">
                 <label>
-                  TÃ­tulo
+                  Título
 
                   <input
                     value={

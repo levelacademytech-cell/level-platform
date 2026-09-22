@@ -287,7 +287,7 @@ export function DashboardPage() {
                 onClick={
                   nextBanner
                 }
-                aria-label="PrÃ³ximo banner"
+                aria-label="Próximo banner"
               >
                 <ChevronRight
                   size={20}
@@ -351,7 +351,7 @@ export function DashboardPage() {
           <Calculator size={20} />
 
           <span>
-            AnÃ¡lises solicitadas
+            Análises solicitadas
           </span>
 
           <strong>
@@ -379,14 +379,14 @@ export function DashboardPage() {
           </span>
 
           <h2>
-            Ferramentas jurÃ­dicas
-            em um sÃ³ ambiente
+            Ferramentas jurídicas
+            em um só ambiente
           </h2>
 
           <p>
-            Acesse calculadoras bancÃ¡rias,
-            trabalhistas, tributÃ¡rias,
-            previdenciÃ¡rias e outras
+            Acesse calculadoras bancárias,
+            trabalhistas, tributárias,
+            previdenciárias e outras
             ferramentas de apoio.
           </p>
 
@@ -409,7 +409,7 @@ export function DashboardPage() {
           </h2>
 
           <p>
-            Use os geradores jurÃ­dicos,
+            Use os geradores jurídicos,
             salve seus documentos e
             gere PDFs diretamente
             pela plataforma.
@@ -429,13 +429,13 @@ export function DashboardPage() {
           </span>
 
           <h2>
-            Organize o histÃ³rico
+            Organize o histórico
             dos seus clientes
           </h2>
 
           <p>
-            Centralize cÃ¡lculos,
-            documentos, contribuiÃ§Ãµes
+            Centralize cálculos,
+            documentos, contribuições
             e andamento dos casos.
           </p>
 
@@ -459,7 +459,7 @@ export function DashboardPage() {
 
           <p>
             Tecnologia criada para
-            apoiar a rotina jurÃ­dica,
+            apoiar a rotina jurídica,
             centralizar ferramentas e
             melhorar a produtividade
             das equipes.

@@ -1,7 +1,7 @@
 {
   "name": "LEVEL ADV",
   "short_name": "LEVEL ADV",
-  "description": "Plataforma jurÃ­dica da Ludo Digital MKT.",
+  "description": "Plataforma jurídica da Ludo Digital MKT.",
   "start_url": "/login",
   "display": "standalone",
   "background_color": "#ffffff",

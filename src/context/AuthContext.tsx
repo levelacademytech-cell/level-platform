@@ -271,7 +271,7 @@ export function AuthProvider({
         )
 
       if (!allowed) {
-        return 'Seu acesso estÃ¡ bloqueado. Entre em contato com o administrador da LEVEL ADV.'
+        return 'Seu acesso está bloqueado. Entre em contato com o administrador da LEVEL ADV.'
       }
     }
 
